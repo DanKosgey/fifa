@@ -167,7 +167,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10 py-16">
           {/* Left Content */}
           <div key={activeSlide} className="animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-            <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="World Cup Trophy" className="absolute -right-10 -top-20 h-[500px] w-auto object-contain opacity-20 pointer-events-none z-0" />
+            <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="World Cup Trophy" className="absolute -right-10 -top-20 h-[500px] w-auto object-contain opacity-80 pointer-events-none z-0" />
             <div className="relative z-10">
               <div 
                 className="inline-block text-black text-[13px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-sm mb-6 font-brand"
@@ -362,7 +362,7 @@ const Home = () => {
             {/* Subtle gold/premium gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#d4af37]/10 via-transparent to-transparent pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-[#d4af37]/5 to-transparent pointer-events-none" />
-            <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="World Cup Trophy" className="absolute right-10 top-1/2 -translate-y-1/2 h-[120%] w-auto object-contain opacity-30 pointer-events-none z-0" />
+            <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="World Cup Trophy" className="absolute right-10 top-1/2 -translate-y-1/2 h-[120%] w-auto object-contain opacity-50 pointer-events-none z-0" />
             
             <div className="px-8 py-12 md:px-12 md:py-16 flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
               <div className="flex-1">

@@ -1,8 +1,53 @@
-import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight, Calendar, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MatchCentre = () => {
   const navigate = useNavigate();
+  const [matches, setMatches] = useState([
+    { id: 'm1', time: "19:00", t1: "Mexico", t2: "South Africa", s1: "0", s2: "0", status: "LIVE", competition: "FIFA World Cup 2026™" },
+    { id: 'm2', time: "15:00", t1: "USA", t2: "Paraguay", s1: "2", s2: "1", status: "FT", competition: "FIFA World Cup 2026™" },
+    { id: 'm3', time: "18:00", t1: "Canada", t2: "Norway", s1: "1", s2: "1", status: "75'", competition: "FIFA World Cup 2026™" },
+    { id: 'm4', time: "12:00", t1: "Brazil", t2: "Japan", s1: "3", s2: "0", status: "FT", competition: "FIFA World Cup 2026™" },
+    { id: 'm5', time: "15:00", t1: "France", t2: "Morocco", s1: "0", s2: "0", status: "15'", competition: "FIFA World Cup 2026™" },
+    { id: 'm6', time: "12:00", t1: "Argentina", t2: "South Korea", s1: "2", s2: "0", status: "FT", competition: "FIFA World Cup 2026™" },
+    { id: 'm7', time: "18:00", t1: "Spain", t2: "Australia", s1: "1", s2: "2", status: "60'", competition: "FIFA World Cup 2026™" },
+    { id: 'm8', time: "21:00", t1: "England", t2: "Egypt", s1: "0", s2: "0", status: "UPCOMING", competition: "FIFA World Cup 2026™" },
+    { id: 'm9', time: "14:00", t1: "Germany", t2: "Uruguay", s1: "1", s2: "0", status: "HT", competition: "FIFA World Cup 2026™" },
+    { id: 'm10', time: "17:00", t1: "Portugal", t2: "Nigeria", s1: "0", s2: "0", status: "UPCOMING", competition: "FIFA World Cup 2026™" },
+    { id: 'm11', time: "20:00", t1: "Netherlands", t2: "Chile", s1: "0", s2: "0", status: "UPCOMING", competition: "FIFA World Cup 2026™" }
+  ]);
+
+  const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'SCORE_UPDATE') {
+          setMatches(prev => prev.map(m => 
+            m.id === data.payload.matchId 
+              ? { ...m, s1: data.payload.s1, s2: data.payload.s2, status: data.payload.status || 'LIVE' } 
+              : m
+          ));
+        }
+      } catch (e) {
+        console.error("WebSocket error:", e);
+      }
+    };
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) ws.close();
+    };
+  }, []);
+
+  const europaLeagueMatches = matches.filter(m => m.competition === "UEFA Europa League");
+  const conferenceLeagueMatches = matches.filter(m => m.competition === "UEFA Europa Conference League");
 
   return (
     <div className="w-full bg-gray-50 min-h-screen">
@@ -115,17 +160,8 @@ const MatchCentre = () => {
             </div>
             
             <div className="divide-y divide-gray-100">
-              {[
-                { time: "18:45", t1: "Feyenoord", t2: "Roma", s1: "1", s2: "1", status: "FT" },
-                { time: "18:45", t1: "Galatasaray", t2: "Sparta Praha", s1: "3", s2: "2", status: "FT" },
-                { time: "18:45", t1: "Shakhtar Donetsk", t2: "Marseille", s1: "2", s2: "2", status: "FT" },
-                { time: "18:45", t1: "Young Boys", t2: "Sporting CP", s1: "1", s2: "3", status: "FT" },
-                { time: "21:00", t1: "AC Milan", t2: "Rennes", s1: "3", s2: "0", status: "FT" },
-                { time: "21:00", t1: "Benfica", t2: "Toulouse", s1: "2", s2: "1", status: "FT" },
-                { time: "21:00", t1: "Braga", t2: "Qarabag FK", s1: "2", s2: "4", status: "FT" },
-                { time: "21:00", t1: "Lens", t2: "Freiburg", s1: "0", s2: "0", status: "FT" }
-              ].map((match, i) => (
-                <div key={i} onClick={() => navigate('/match/1')} className="flex flex-col md:flex-row items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group cursor-pointer">
+              {europaLeagueMatches.map((match) => (
+                <div key={match.id} onClick={() => navigate('/match/1')} className="flex flex-col md:flex-row items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group cursor-pointer">
                   <div className="flex items-center w-full md:w-auto mb-4 md:mb-0">
                     <span className="text-sm font-bold text-gray-400 w-16">{match.time}</span>
                     <span className="text-xs font-bold uppercase tracking-wider text-[#005eb8] bg-blue-50 px-2 py-1 rounded hidden md:inline-block mr-4 opacity-0 group-hover:opacity-100 transition-opacity">Match Centre</span>
@@ -140,7 +176,7 @@ const MatchCentre = () => {
                     </div>
                     
                     <div className="flex items-center justify-center w-24 px-4">
-                      <div className="bg-[#00143F] text-white font-black text-lg px-3 py-1 rounded shadow-inner flex items-center space-x-2">
+                      <div className={`bg-[#00143F] text-white font-black text-lg px-3 py-1 rounded shadow-inner flex items-center space-x-2 transition-all duration-300 ${match.status === 'LIVE' ? 'ring-2 ring-red-500 animate-pulse' : ''}`}>
                         <span>{match.s1}</span>
                         <span className="text-gray-400 text-sm">-</span>
                         <span>{match.s2}</span>
@@ -156,7 +192,10 @@ const MatchCentre = () => {
                   </div>
                   
                   <div className="flex items-center justify-end w-full md:w-24 mt-4 md:mt-0">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-1 rounded">{match.status}</span>
+                    <span className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 ${match.status === 'LIVE' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                      {match.status === 'LIVE' && <Activity className="w-3 h-3 animate-pulse" />}
+                      {match.status}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -176,12 +215,8 @@ const MatchCentre = () => {
             </div>
             
             <div className="divide-y divide-gray-100">
-              {[
-                { time: "18:45", t1: "Maccabi Haifa", t2: "Gent", s1: "1", s2: "0", status: "FT" },
-                { time: "18:45", t1: "Molde", t2: "Legia Warszawa", s1: "3", s2: "2", status: "FT" },
-                { time: "18:45", t1: "Olympiakos", t2: "Ferencvaros", s1: "1", s2: "0", status: "FT" }
-              ].map((match, i) => (
-                <div key={i} onClick={() => navigate('/match/1')} className="flex flex-col md:flex-row items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group cursor-pointer">
+              {conferenceLeagueMatches.map((match) => (
+                <div key={match.id} onClick={() => navigate('/match/1')} className="flex flex-col md:flex-row items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group cursor-pointer">
                   <div className="flex items-center w-full md:w-auto mb-4 md:mb-0">
                     <span className="text-sm font-bold text-gray-400 w-16">{match.time}</span>
                     <span className="text-xs font-bold uppercase tracking-wider text-[#005eb8] bg-blue-50 px-2 py-1 rounded hidden md:inline-block mr-4 opacity-0 group-hover:opacity-100 transition-opacity">Match Centre</span>
@@ -196,7 +231,7 @@ const MatchCentre = () => {
                     </div>
                     
                     <div className="flex items-center justify-center w-24 px-4">
-                      <div className="bg-[#00143F] text-white font-black text-lg px-3 py-1 rounded shadow-inner flex items-center space-x-2">
+                      <div className={`bg-[#00143F] text-white font-black text-lg px-3 py-1 rounded shadow-inner flex items-center space-x-2 transition-all duration-300 ${match.status === 'LIVE' ? 'ring-2 ring-red-500 animate-pulse' : ''}`}>
                         <span>{match.s1}</span>
                         <span className="text-gray-400 text-sm">-</span>
                         <span>{match.s2}</span>
@@ -212,7 +247,10 @@ const MatchCentre = () => {
                   </div>
                   
                   <div className="flex items-center justify-end w-full md:w-24 mt-4 md:mt-0">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-1 rounded">{match.status}</span>
+                    <span className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 ${match.status === 'LIVE' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                      {match.status === 'LIVE' && <Activity className="w-3 h-3 animate-pulse" />}
+                      {match.status}
+                    </span>
                   </div>
                 </div>
               ))}

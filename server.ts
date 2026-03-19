@@ -181,6 +181,30 @@ async function startServer() {
       });
     }
   }, 5000); // Check every 5 seconds
+
+  // Background task to simulate score updates
+  setInterval(() => {
+    const matchIds = ['m1', 'm3', 'm5', 'm7', 'm9']; // Only update matches that could be live
+    const randomMatchId = matchIds[Math.floor(Math.random() * matchIds.length)];
+    
+    // Simulate a goal
+    const s1 = Math.floor(Math.random() * 4);
+    const s2 = Math.floor(Math.random() * 4);
+    
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          type: 'SCORE_UPDATE',
+          payload: {
+            matchId: randomMatchId,
+            s1: s1.toString(),
+            s2: s2.toString(),
+            status: 'LIVE'
+          }
+        }));
+      }
+    });
+  }, 8000); // Update a score every 8 seconds
 }
 
 startServer();

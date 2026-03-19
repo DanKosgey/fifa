@@ -135,21 +135,38 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 5 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 pointer-events-none bg-[#0a0a0a]/95 backdrop-blur-md text-white px-5 py-4 rounded-xl shadow-2xl min-w-[180px] border border-gray-800"
+            className="absolute z-50 pointer-events-none bg-[#0a0a0a]/95 backdrop-blur-md text-white px-5 py-4 rounded-xl shadow-2xl min-w-[200px] border border-gray-800"
             style={{
-              left: Math.min(mousePos.x + 15, (containerRef.current?.offsetWidth || 800) - 195),
-              top: Math.min(mousePos.y + 15, (containerRef.current?.offsetHeight || 600) - 100),
+              left: mousePos.x + 200 > (containerRef.current?.offsetWidth || 800) 
+                ? mousePos.x - 220 
+                : mousePos.x + 20,
+              top: mousePos.y + 120 > (containerRef.current?.offsetHeight || 600)
+                ? mousePos.y - 130
+                : mousePos.y + 20,
             }}
           >
             {(() => {
               const section = SECTIONS.find(s => s.id === hoveredSection);
               if (!section) return null;
+              const colors = CATEGORY_COLORS[section.category];
               return (
-                <div className="flex flex-col gap-2">
-                  <div className="font-black text-sm uppercase tracking-widest text-white mb-1">{section.name}</div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                    <div className="font-black text-sm uppercase tracking-widest text-white">{section.name}</div>
+                    <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.5)]" style={{ backgroundColor: colors.fill }} />
+                  </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-300 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 bg-gray-800 rounded border border-gray-700">{section.category}</span>
-                    <span className="font-black text-[#d4af37] text-sm">${section.price}</span>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Category</span>
+                      <span className="text-white text-[11px] font-black uppercase tracking-widest">{section.category}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Starting From</span>
+                      <span className="font-black text-[#d4af37] text-lg leading-none">${section.price}</span>
+                    </div>
+                  </div>
+                  <div className="text-[9px] text-gray-400 font-medium italic">
+                    * Prices subject to availability
                   </div>
                 </div>
               );

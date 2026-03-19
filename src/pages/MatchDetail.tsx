@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, ArrowLeft, ShieldCheck, Ticket, Filter, Bell, X, AlertCircle, Smartphone, Printer, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, ArrowLeft, ShieldCheck, Ticket, Filter, Bell, X, AlertCircle, Smartphone, Printer, Download, CreditCard, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SeatMap, { Section } from '../components/SeatMap';
 
@@ -484,10 +484,6 @@ export default function MatchDetail() {
                       <button 
                         onClick={() => {
                           setCheckoutStep('success');
-                          setTimeout(() => {
-                            setIsCheckoutOpen(false);
-                            setCheckoutStep('details');
-                          }, 3000);
                         }}
                         className="w-2/3 bg-[#0066FF] text-white font-black py-4 rounded-sm uppercase tracking-widest hover:bg-[#0052cc] transition-colors shadow-lg flex items-center justify-center gap-2"
                       >
@@ -499,12 +495,69 @@ export default function MatchDetail() {
                 )}
 
                 {checkoutStep === 'success' && (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-8 flex flex-col items-center text-center space-y-4">
-                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-6 flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-600" />
                     </div>
-                    <h3 className="text-2xl font-black uppercase tracking-widest text-gray-900">Payment Successful!</h3>
-                    <p className="text-gray-500">Your tickets have been secured. We've sent a confirmation email with your e-tickets.</p>
+                    <h3 className="text-2xl font-black uppercase tracking-widest text-gray-900 mb-2">Booking Confirmed!</h3>
+                    <p className="text-gray-500 text-sm mb-6">Your tickets have been secured. A confirmation email has been sent to your inbox.</p>
+                    
+                    <div className="w-full bg-gray-50 rounded-xl border border-dashed border-gray-300 p-6 mb-8 text-left">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">Booking ID</span>
+                          <span className="text-lg font-mono font-bold text-[#00143F]">FWC-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">Status</span>
+                          <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Confirmed</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3 pt-4 border-t border-gray-200">
+                        <div className="flex justify-between">
+                          <span className="text-xs text-gray-500">Match</span>
+                          <span className="text-xs font-bold text-gray-900">{MATCH_DATA.homeTeam} vs {MATCH_DATA.awayTeam}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-gray-500">Category</span>
+                          <span className="text-xs font-bold text-gray-900">{selectedTicket.category || `Section ${selectedTicket.sectionId?.replace('_', ' ')}`}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-gray-500">Quantity</span>
+                          <span className="text-xs font-bold text-gray-900">{ticketQuantity} Tickets</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-gray-500">Total Paid</span>
+                          <span className="text-xs font-bold text-gray-900">${(selectedTicket.price * ticketQuantity * 1.15).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col w-full gap-3">
+                      <button 
+                        onClick={() => window.print()}
+                        className="w-full bg-[#00143F] text-white font-black py-4 rounded-sm uppercase tracking-widest hover:bg-black transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Printer className="w-5 h-5" />
+                        Print Tickets
+                      </button>
+                      <button 
+                        className="w-full bg-white border border-gray-200 text-gray-700 font-black py-4 rounded-sm uppercase tracking-widest hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-5 h-5" />
+                        Download PDF
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsCheckoutOpen(false);
+                          setCheckoutStep('details');
+                        }}
+                        className="w-full text-gray-400 font-bold py-2 text-xs uppercase tracking-widest hover:text-gray-600 transition-colors"
+                      >
+                        Close Window
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </div>
