@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const TicketAdPopup = () => {
+const BallTicketWidget = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -154,11 +154,16 @@ const TicketAdPopup = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: radial-gradient(circle at center, #1a0008 0%, #080003 100%);
+          background: #080003;
           font-family: var(--font-barlow);
           pointer-events: auto;
           box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,80,0,0.1);
           border: 1px solid rgba(255,100,0,0.25);
+        }
+        .wc-bg-base {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at center, #1a0008 0%, #080003 100%);
         }
         .wc-bg-glow {
           position: absolute;
@@ -167,6 +172,48 @@ const TicketAdPopup = () => {
             radial-gradient(ellipse at 20% 70%, rgba(255,60,0,0.22) 0%, transparent 50%),
             radial-gradient(ellipse at 80% 30%, rgba(255,140,0,0.15) 0%, transparent 45%),
             radial-gradient(ellipse at 50% 100%, rgba(200,0,50,0.2) 0%, transparent 60%);
+          mix-blend-mode: screen;
+          z-index: 1;
+        }
+        /* Volumetric Light Rays */
+        .wc-rays {
+          position: absolute;
+          inset: -50%;
+          background: repeating-conic-gradient(
+            from 0deg at 50% 50%,
+            transparent 0deg,
+            rgba(255, 100, 0, 0.03) 10deg,
+            transparent 20deg
+          );
+          filter: blur(20px);
+          animation: wcRayRotate 60s linear infinite;
+          opacity: 0.6;
+          z-index: 0;
+        }
+        @keyframes wcRayRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        /* Atmospheric Fog */
+        .wc-fog {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+        }
+        .wc-fog-layer {
+          position: absolute;
+          inset: -100%;
+          background-image: radial-gradient(circle at center, rgba(255,80,0,0.08) 0%, transparent 70%);
+          filter: blur(40px);
+          animation: wcFogDrift var(--dur) linear infinite;
+          opacity: 0.4;
+        }
+        @keyframes wcFogDrift {
+          0% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(10%, 5%) scale(1.1); }
+          66% { transform: translate(-5%, 10%) scale(0.9); }
+          100% { transform: translate(0, 0) scale(1); }
         }
         .wc-grid {
           position: absolute;
@@ -176,6 +223,7 @@ const TicketAdPopup = () => {
             linear-gradient(90deg, rgba(255,100,0,0.05) 1px, transparent 1px);
           background-size: 24px 24px;
           mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+          z-index: 2;
         }
         .wc-corner-tag {
           position: absolute;
@@ -188,12 +236,14 @@ const TicketAdPopup = () => {
           text-transform: uppercase;
           letter-spacing: 2px;
           pointer-events: none;
+          z-index: 5;
         }
         .wc-particle {
           position: absolute;
           border-radius: 50%;
           pointer-events: none;
           animation: wcFloatUp var(--dur) var(--del) ease-in infinite;
+          z-index: 3;
         }
         @keyframes wcFloatUp {
           0%   { transform: translateY(0) scale(1); opacity: 0.6; }
@@ -205,6 +255,7 @@ const TicketAdPopup = () => {
           height: 44px;
           animation: wcJourney 3.2s cubic-bezier(0.25,0.1,0.25,1) forwards;
           filter: drop-shadow(0 0 12px rgba(255,100,0,0.8));
+          z-index: 10;
         }
         .wc-ball-svg {
           width: 44px;
@@ -236,6 +287,7 @@ const TicketAdPopup = () => {
           opacity: 0;
           border: 2px solid;
           pointer-events: none;
+          z-index: 8;
         }
         .wc-ring-1 { width: 50px; height: 50px; border-color: rgba(255,160,0,0.9); animation: wcRingOut 0.7s ease-out 2.8s forwards; }
         .wc-ring-2 { width: 50px; height: 50px; border-color: rgba(255,80,0,0.7);  animation: wcRingOut 0.7s ease-out 2.95s forwards; }
@@ -253,6 +305,7 @@ const TicketAdPopup = () => {
           opacity: 0;
           pointer-events: none;
           animation: wcBurst 0.5s ease-out 2.9s forwards;
+          z-index: 9;
         }
         @keyframes wcBurst {
           0%   { opacity: 0; transform: translate(-50%,-50%) scale(0); }
@@ -267,6 +320,7 @@ const TicketAdPopup = () => {
           transform: translateX(-50%) translateY(0) scale(1);
           width: 210px;
           animation: wcPopIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+          z-index: 20;
         }
         @keyframes wcPopIn {
           0%   { opacity: 0; transform: translateX(-50%) translateY(80px) scale(0.85); }
@@ -391,6 +445,17 @@ const TicketAdPopup = () => {
       `}</style>
 
       <div className="wc-stage" ref={stageRef}>
+        <div className="wc-bg-base" />
+        
+        {/* Volumetric Rays */}
+        <div className="wc-rays" />
+        
+        {/* Atmospheric Fog Layers */}
+        <div className="wc-fog">
+          <div className="wc-fog-layer" style={{ '--dur': '25s' } as any} />
+          <div className="wc-fog-layer" style={{ '--dur': '35s', opacity: 0.2, animationDirection: 'reverse' } as any} />
+        </div>
+
         <div className="wc-bg-glow" />
         <div className="wc-grid" />
         <div className="wc-corner-tag">FIFA World Cup 2026™</div>
@@ -411,7 +476,7 @@ const TicketAdPopup = () => {
         ))}
 
         {/* Fire trail canvas */}
-        <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+        <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 4 }} />
 
         {/* Explosion rings */}
         <div key={`rings-${ringsKey}`}>
@@ -512,4 +577,4 @@ const TicketAdPopup = () => {
   );
 };
 
-export default TicketAdPopup;
+export default BallTicketWidget;

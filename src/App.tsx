@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import Tournaments from './pages/Tournaments';
 import MatchCentre from './pages/MatchCentre';
 import MatchDetail from './pages/MatchDetail';
-import TicketAdPopup from './components/TicketAdPopup';
+import BallTicketWidget from './components/BallTicketWidget';
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <TicketAdPopup />
+        <BallTicketWidget />
       </div>
     </Router>
   );
