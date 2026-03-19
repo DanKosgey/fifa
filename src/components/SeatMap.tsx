@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Info, MapPin } from 'lucide-react';
 
 export type TicketCategory = 'CAT 1' | 'CAT 2' | 'CAT 3' | 'CAT 4';
 
@@ -31,10 +32,10 @@ const SECTIONS: Section[] = [
 ];
 
 const CATEGORY_COLORS: Record<TicketCategory, { fill: string; hover: string; selected: string }> = {
-  'CAT 1': { fill: '#fcd34d', hover: '#fbbf24', selected: '#f59e0b' }, // Amber
-  'CAT 2': { fill: '#93c5fd', hover: '#60a5fa', selected: '#3b82f6' }, // Blue
-  'CAT 3': { fill: '#86efac', hover: '#4ade80', selected: '#22c55e' }, // Green
-  'CAT 4': { fill: '#d8b4fe', hover: '#c084fc', selected: '#a855f7' }, // Purple
+  'CAT 1': { fill: '#0F172A', hover: '#1E293B', selected: '#020617' }, // Slate 900
+  'CAT 2': { fill: '#334155', hover: '#475569', selected: '#1E293B' }, // Slate 700
+  'CAT 3': { fill: '#64748B', hover: '#94A3B8', selected: '#475569' }, // Slate 500
+  'CAT 4': { fill: '#94A3B8', hover: '#CBD5E1', selected: '#64748B' }, // Slate 400
 };
 
 interface SeatMapProps {
@@ -60,36 +61,44 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
     <div 
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full max-w-3xl mx-auto aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden shadow-inner border border-gray-200"
+      className="relative w-full max-w-3xl mx-auto aspect-[4/3] bg-white/50 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-slate-900/10"
     >
+      <style>{`
+        .font-mono-data { font-family: 'JetBrains Mono', monospace; }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; filter: brightness(1); }
+          50% { opacity: 0.8; filter: brightness(1.2); }
+        }
+        .pitch-glow { animation: pulse-glow 4s ease-in-out infinite; }
+      `}</style>
+
       <svg
         viewBox="0 0 800 600"
-        className="w-full h-full drop-shadow-xl"
-        style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }}
+        className="w-full h-full"
       >
         {/* Pitch */}
         <g className="pitch">
-          <rect x="200" y="180" width="400" height="240" fill="#166534" rx="4" />
+          <rect x="200" y="180" width="400" height="240" fill="#064E3B" rx="8" className="pitch-glow" />
           {/* Pitch Lines */}
-          <line x1="400" y1="180" x2="400" y2="420" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-          <circle cx="400" cy="300" r="40" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-          <circle cx="400" cy="300" r="4" fill="rgba(255,255,255,0.4)" />
+          <line x1="400" y1="180" x2="400" y2="420" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
+          <circle cx="400" cy="300" r="40" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+          <circle cx="400" cy="300" r="4" fill="rgba(255,255,255,0.3)" />
           
           {/* Left Penalty Area */}
-          <rect x="200" y="240" width="60" height="120" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-          <rect x="200" y="270" width="20" height="60" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-          <circle cx="240" cy="300" r="3" fill="rgba(255,255,255,0.4)" />
-          <path d="M 260 270 A 30 30 0 0 1 260 330" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
+          <rect x="200" y="240" width="60" height="120" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+          <rect x="200" y="270" width="20" height="60" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+          <circle cx="240" cy="300" r="3" fill="rgba(255,255,255,0.3)" />
+          <path d="M 260 270 A 30 30 0 0 1 260 330" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
 
           {/* Right Penalty Area */}
-          <rect x="540" y="240" width="60" height="120" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-          <rect x="580" y="270" width="20" height="60" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-          <circle cx="560" cy="300" r="3" fill="rgba(255,255,255,0.4)" />
-          <path d="M 540 270 A 30 30 0 0 0 540 330" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
+          <rect x="540" y="240" width="60" height="120" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+          <rect x="580" y="270" width="20" height="60" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
+          <circle cx="560" cy="300" r="3" fill="rgba(255,255,255,0.3)" />
+          <path d="M 540 270 A 30 30 0 0 0 540 330" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
         </g>
 
         {/* Stands */}
-        <g className="stands" stroke="#ffffff" strokeWidth="3" strokeLinejoin="round">
+        <g className="stands" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeLinejoin="round">
           {SECTIONS.map((section) => {
             const isSelected = selectedSection === section.id;
             const isHovered = hoveredSection === section.id;
@@ -100,17 +109,19 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
               <motion.path
                 key={section.id}
                 d={section.path}
-                fill={isSelected ? colors.selected : isHovered ? colors.hover : colors.fill}
-                opacity={isFaded ? 0.4 : 1}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: isFaded ? 0.4 : 1, scale: 1 }}
+                fill={isSelected ? '#10B981' : isHovered ? '#059669' : colors.fill}
+                opacity={isFaded ? 0.2 : 1}
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: isFaded ? 0.2 : 1,
+                  fill: isSelected ? '#10B981' : isHovered ? '#34D399' : colors.fill
+                }}
                 transition={{ duration: 0.3 }}
                 onClick={() => onSelectSection(isSelected ? null : section.id)}
                 onPointerEnter={() => setHoveredSection(section.id)}
                 onPointerLeave={() => setHoveredSection(null)}
                 className="cursor-pointer transition-colors duration-200"
-                whileHover={{ scale: 1.01, zIndex: 10 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01, filter: 'brightness(1.2)' }}
               />
             );
           })}
@@ -118,14 +129,15 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
       </svg>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-sm border border-gray-100 flex flex-wrap justify-center gap-4 text-xs font-medium text-gray-700">
+      <div className="absolute bottom-6 left-6 right-6 bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-slate-900/10 flex flex-wrap justify-center gap-6">
         {Object.entries(CATEGORY_COLORS).map(([cat, colors]) => (
-          <div key={cat} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: colors.fill }} />
-            <span>{cat}</span>
+          <div key={cat} className="flex items-center gap-2.5">
+            <div className="w-3 h-3 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-slate-900/20" style={{ backgroundColor: colors.fill }} />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">{cat}</span>
           </div>
         ))}
       </div>
+
 
       {/* Tooltip */}
       <AnimatePresence>
@@ -135,13 +147,13 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 5 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 pointer-events-none bg-[#0a0a0a]/95 backdrop-blur-md text-white px-5 py-4 rounded-xl shadow-2xl min-w-[200px] border border-gray-800"
+            className="absolute z-50 pointer-events-none bg-white/95 backdrop-blur-md text-slate-900 px-6 py-5 rounded-2xl shadow-2xl min-w-[220px] border border-slate-800"
             style={{
-              left: mousePos.x + 200 > (containerRef.current?.offsetWidth || 800) 
-                ? mousePos.x - 220 
+              left: mousePos.x + 220 > (containerRef.current?.offsetWidth || 800) 
+                ? mousePos.x - 240 
                 : mousePos.x + 20,
-              top: mousePos.y + 120 > (containerRef.current?.offsetHeight || 600)
-                ? mousePos.y - 130
+              top: mousePos.y + 140 > (containerRef.current?.offsetHeight || 600)
+                ? mousePos.y - 150
                 : mousePos.y + 20,
             }}
           >
@@ -150,23 +162,29 @@ export default function SeatMap({ selectedSection, onSelectSection }: SeatMapPro
               if (!section) return null;
               const colors = CATEGORY_COLORS[section.category];
               return (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-                    <div className="font-black text-sm uppercase tracking-widest text-white">{section.name}</div>
-                    <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.5)]" style={{ backgroundColor: colors.fill }} />
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Category</span>
-                      <span className="text-white text-[11px] font-black uppercase tracking-widest">{section.category}</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="font-black text-xs uppercase tracking-widest text-slate-900">{section.name}</span>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Starting From</span>
-                      <span className="font-black text-[#d4af37] text-lg leading-none">${section.price}</span>
+                    <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]" style={{ backgroundColor: colors.fill }} />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Category</span>
+                      <span className="text-slate-900 text-[11px] font-black uppercase tracking-widest">{section.category}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-1">From</span>
+                      <span className="font-black text-slate-900 text-xl leading-none font-mono-data tracking-tighter">${section.price}</span>
                     </div>
                   </div>
-                  <div className="text-[9px] text-gray-400 font-medium italic">
-                    * Prices subject to availability
+
+                  <div className="flex items-center gap-2 bg-slate-100/50 px-3 py-2 rounded-lg border border-slate-700/50">
+                    <Info className="w-3 h-3 text-slate-500" />
+                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Click to filter listings</span>
                   </div>
                 </div>
               );

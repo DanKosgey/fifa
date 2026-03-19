@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,900&family=Barlow+Condensed:wght@700;900&family=Barlow:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,900&family=Barlow+Condensed:wght@700;900&family=Barlow:wght@500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,12 +6,62 @@
   --font-heading: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   --font-barlow: "Barlow", sans-serif;
   --font-barlow-cond: "Barlow Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --animate-shine: shine 3s infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  
+  @keyframes shine {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
 }
 
-body {
-  font-family: var(--font-sans);
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500/30;
+  }
 }
 
-h1, h2, h3, h4, h5, h6, .font-black {
-  font-family: var(--font-heading);
+@layer components {
+  .glass-card {
+    @apply bg-slate-900/5 backdrop-blur-xl border border-slate-900/10 rounded-3xl transition-all duration-300;
+  }
+  
+  .glass-card-hover {
+    @apply hover:bg-slate-900/10 hover:border-slate-900/20 hover:shadow-2xl hover:shadow-emerald-500/10;
+  }
+
+  .shining-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-200 to-white bg-[length:200%_auto] animate-shine;
+  }
+
+  .shining-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20;
+  }
+
+  .shining-button::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-slate-900/20 to-transparent -translate-x-full animate-shine pointer-events-none;
+  }
+
+  .ticker-wrap {
+    @apply w-full overflow-hidden;
+  }
+
+  .ticker-move {
+    @apply flex w-max items-center gap-8 animate-[ticker_40s_linear_infinite];
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 }
+
+.font-mono-data { font-family: var(--font-mono); }
