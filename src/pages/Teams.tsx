@@ -72,18 +72,18 @@ const Teams = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05 }}
-                className="glass-card p-10 flex flex-col items-center justify-center text-center border-white/60 shadow-2xl group cursor-pointer active:scale-95"
+                className="glass-card p-5 sm:p-10 flex flex-col items-center justify-center text-center border-white/60 shadow-2xl group cursor-pointer active:scale-95"
               >
-                <div className="text-7xl mb-6 group-hover:scale-110 transition-transform drop-shadow-2xl">{team.flag}</div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-1">{team.name}</h3>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-800 mb-6">{team.code}</span>
+                <div className="text-5xl sm:text-7xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform drop-shadow-2xl">{team.flag}</div>
+                <h3 className="text-lg sm:text-2xl font-black text-slate-900 uppercase tracking-tighter mb-1">{team.name}</h3>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-800 mb-4 sm:mb-6">{team.code}</span>
                 
-                <div className="w-full flex justify-between items-center pt-6 border-t border-slate-900/5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900/60">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-                    {team.region}
+                <div className="w-full flex justify-between items-center pt-4 sm:pt-6 border-t border-slate-900/5">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-900/60">
+                    <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500 flex-shrink-0" />
+                    <span className="truncate">{team.region}</span>
                   </div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-900/80 glass-card px-3 py-1.5 border-white/40">
+                  <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-900/80 glass-card px-2 sm:px-3 py-1 sm:py-1.5 border-white/40 flex-shrink-0 ml-1">
                     Pot {team.pot}
                   </div>
                 </div>

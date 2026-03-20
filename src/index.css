@@ -106,3 +106,17 @@
 }
 
 .font-mono-data { font-family: var(--font-mono); }
+
+/* Utility: hide scrollbar while keeping scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile safe-area bottom padding (for devices with home indicators) */
+.h-safe-area-inset-bottom {
+  height: env(safe-area-inset-bottom, 0px);
+}

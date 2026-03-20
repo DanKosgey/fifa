@@ -140,17 +140,17 @@ const MatchCentre = () => {
         className="bg-white/70 backdrop-blur-2xl border-b border-white/60 sticky top-0 z-50 shadow-sm"
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900/40">Match Centre</span>
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900/40 flex-shrink-0 hidden sm:block">Match Centre</span>
             
-            <nav className="hidden md:flex space-x-6">
+            <nav className="flex space-x-4 sm:space-x-6 overflow-x-auto hide-scrollbar">
               {subLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
                   <Link 
                     key={link.name}
                     to={link.path} 
-                    className={`text-[10px] flex items-center font-black uppercase tracking-widest transition-colors h-16 px-1 relative ${
+                    className={`text-[10px] flex-shrink-0 flex items-center font-black uppercase tracking-widest transition-colors h-16 px-1 relative ${
                       isActive ? 'text-slate-900' : 'text-slate-800 hover:text-slate-900'
                     }`}
                   >

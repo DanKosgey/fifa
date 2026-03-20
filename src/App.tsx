@@ -3,6 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import MobileNav from './components/MobileNav';
 import Home from './pages/Home';
 import Tournaments from './pages/Tournaments';
 import MatchCentre from './pages/MatchCentre';
@@ -38,7 +39,7 @@ function App() {
 
         <div className="relative z-10 flex flex-col min-h-screen">
           <Header />
-          <main className="flex-grow">
+          <main className="flex-grow pb-16 lg:pb-0">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/tournaments" element={<Tournaments />} />
@@ -66,6 +67,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <MobileNav />
           <BallTicketWidget />
         </div>
       </div>

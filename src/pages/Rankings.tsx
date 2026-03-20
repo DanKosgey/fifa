@@ -53,12 +53,12 @@ const Rankings = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-16 relative z-10">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900 flex items-center gap-3">
             <Globe className="w-6 h-6 text-slate-400" />
             Global Elite
           </h3>
-          <div className="relative w-64">
+          <div className="relative w-full md:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
@@ -74,10 +74,11 @@ const Rankings = () => {
 
         <div className="glass-card border-white/60 overflow-hidden shadow-2xl">
           {/* Header */}
-          <div className="grid grid-cols-[60px_1fr_100px_80px] px-8 py-5 bg-white/60 backdrop-blur-md border-b border-white/60">
-            {['Rank', 'Nation', 'Points', 'Trend'].map(h => (
-              <div key={h} className="text-[10px] font-black text-slate-800 uppercase tracking-[0.4em]">{h}</div>
+          <div className="grid grid-cols-[48px_1fr_80px] sm:grid-cols-[60px_1fr_100px_80px] px-4 sm:px-8 py-4 sm:py-5 bg-white/60 backdrop-blur-md border-b border-white/60">
+            {['Rank', 'Nation', 'Points'].map(h => (
+              <div key={h} className={`text-[10px] font-black text-slate-800 uppercase tracking-[0.4em] ${h === 'Points' ? 'hidden sm:block' : ''}`}>{h}</div>
             ))}
+            <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.4em] hidden sm:block">Trend</div>
           </div>
           
           {/* Rows */}
@@ -93,18 +94,18 @@ const Rankings = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="grid grid-cols-[60px_1fr_100px_80px] px-8 py-6 items-center hover:bg-slate-50 transition-colors cursor-default"
+                className="grid grid-cols-[48px_1fr_80px] sm:grid-cols-[60px_1fr_100px_80px] px-4 sm:px-8 py-4 sm:py-6 items-center hover:bg-slate-50 transition-colors cursor-default"
               >
                 <div className="flex items-center gap-2">
-                  <div className="text-lg font-black text-slate-900 font-mono-data">{r.pos}</div>
-                  {r.pos === 1 && <Award className="w-5 h-5 text-emerald-500" />}
+                  <div className="text-base sm:text-lg font-black text-slate-900 font-mono-data">{r.pos}</div>
+                  {r.pos === 1 && <Award className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />}
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-4xl drop-shadow-2xl">{r.flag}</span>
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">{r.name}</span>
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-2xl sm:text-4xl drop-shadow-2xl">{r.flag}</span>
+                  <span className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-[0.1em] sm:tracking-[0.2em]">{r.name}</span>
                 </div>
-                <div className="text-sm font-black text-slate-900/80 font-mono-data">{r.pts}</div>
-                <div className="flex items-center gap-1.5">
+                <div className="text-xs sm:text-sm font-black text-slate-900/80 font-mono-data hidden sm:block">{r.pts}</div>
+                <div className="flex items-center gap-1.5 hidden sm:flex">
                   <div className={`flex items-center justify-center w-6 h-6 rounded-full ${r.change.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : r.change === '0' ? 'bg-slate-900/10 text-slate-400' : 'bg-red-50 text-red-600'}`}>
                     {r.change.startsWith('+') ? '▲' : r.change === '0' ? '—' : '▼'}
                   </div>
