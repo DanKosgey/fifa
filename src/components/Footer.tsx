@@ -17,28 +17,28 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="space-y-8">
             <Link to="/" className="flex items-center gap-4 group">
-              <div className="w-12 h-12 bg-slate-900/5 rounded-2xl flex items-center justify-center p-2 border border-slate-900/10 group-hover:scale-105 transition-transform">
-                <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="FIFA" className="h-full w-auto object-contain brightness-0 invert" />
+              <div className="w-12 h-12 glass-card flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
+                <img src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" alt="FIFA" className="h-full w-auto object-contain brightness-0" />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tighter uppercase leading-none">FIFA</span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 leading-none mt-1">World Cup 2026</span>
+                <span className="text-2xl font-black tracking-tighter uppercase leading-none shining-text">FIFA</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 leading-none mt-1">World Cup 2026</span>
               </div>
             </Link>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">
-              The official marketplace for the FIFA World Cup 2026™. Secure your tickets, hospitality, and travel packages for the biggest sporting event in history.
+            <p className="text-slate-800 text-sm leading-relaxed font-bold">
+              The global portal for the FIFA World Cup 2026™. Secure your official tickets, premium hospitality, and exclusive travel packages for the most historic sporting event on the planet.
             </p>
             <div className="flex items-center space-x-4">
-              <a href="#" className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 hover:bg-slate-900/10 transition-all text-slate-500 hover:text-slate-900">
+              <a href="https://twitter.com/fifaworldcup" target="_blank" rel="noopener noreferrer" className="w-10 h-10 glass-card flex items-center justify-center hover:bg-white transition-all text-slate-500 hover:text-emerald-500">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 hover:bg-slate-900/10 transition-all text-slate-500 hover:text-slate-900">
+              <a href="https://instagram.com/fifaworldcup" target="_blank" rel="noopener noreferrer" className="w-10 h-10 glass-card flex items-center justify-center hover:bg-white transition-all text-slate-500 hover:text-emerald-500">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 hover:bg-slate-900/10 transition-all text-slate-500 hover:text-slate-900">
+              <a href="https://facebook.com/fifaworldcup" target="_blank" rel="noopener noreferrer" className="w-10 h-10 glass-card flex items-center justify-center hover:bg-white transition-all text-slate-500 hover:text-emerald-500">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 hover:bg-slate-900/10 transition-all text-slate-500 hover:text-slate-900">
+              <a href="https://youtube.com/fifa" target="_blank" rel="noopener noreferrer" className="w-10 h-10 glass-card flex items-center justify-center hover:bg-white transition-all text-slate-500 hover:text-emerald-500">
                 <Youtube className="w-5 h-5" />
               </a>
             </div>
@@ -48,23 +48,23 @@ const Footer = () => {
           <div className="space-y-8">
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Tournament</h4>
             <ul className="space-y-4">
-              <li><Link to="/tournaments" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Host Cities</Link></li>
-              <li><Link to="/match-centre" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Match Schedule</Link></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Teams & Rankings</a></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Official News</a></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Inside FIFA</a></li>
+              <li><Link to="/tournaments" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Host Cities</Link></li>
+              <li><Link to="/match-centre" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Match Schedule</Link></li>
+              <li><Link to="/teams" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Teams & Rankings</Link></li>
+              <li><Link to="/news" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Tournament News</Link></li>
+              <li><Link to="/inside-fifa" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Inside FIFA</Link></li>
             </ul>
           </div>
 
           {/* Tickets & Support */}
           <div className="space-y-8">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Tickets & Support</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900/40">Access & Assistance</h4>
             <ul className="space-y-4">
-              <li><Link to="/tickets" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Buy Tickets</Link></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Hospitality Packages</a></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Resale Marketplace</a></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Help Centre</a></li>
-              <li><a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Ticket Verification</a></li>
+              <li><Link to="/tickets" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Buy Tickets</Link></li>
+              <li><Link to="/hospitality" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Hospitality Packages</Link></li>
+              <li><Link to="/tickets" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Resale Marketplace</Link></li>
+              <li><Link to="/support" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Help Centre</Link></li>
+              <li><Link to="/ticket-verification" className="text-sm font-black text-slate-800 hover:text-emerald-500 transition-colors uppercase tracking-widest">Ticket Verification</Link></li>
             </ul>
           </div>
 
@@ -73,20 +73,20 @@ const Footer = () => {
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Contact</h4>
             <ul className="space-y-5">
               <li className="flex items-center space-x-4 group cursor-pointer">
-                <div className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 group-hover:bg-slate-900/10 transition-all">
-                  <Mail className="w-4 h-4 text-slate-500 group-hover:text-slate-900" />
+                <div className="w-10 h-10 glass-card flex items-center justify-center group-hover:bg-white transition-all">
+                  <Mail className="w-4 h-4 text-slate-500 group-hover:text-emerald-500" />
                 </div>
                 <span className="text-sm font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-widest">tickets@fifa.com</span>
               </li>
               <li className="flex items-center space-x-4 group cursor-pointer">
-                <div className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 group-hover:bg-slate-900/10 transition-all">
-                  <Phone className="w-4 h-4 text-slate-500 group-hover:text-slate-900" />
+                <div className="w-10 h-10 glass-card flex items-center justify-center group-hover:bg-white transition-all">
+                  <Phone className="w-4 h-4 text-slate-500 group-hover:text-emerald-500" />
                 </div>
                 <span className="text-sm font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-widest">+41 43 222 7777</span>
               </li>
               <li className="flex items-center space-x-4 group cursor-pointer">
-                <div className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center border border-slate-900/10 group-hover:bg-slate-900/10 transition-all">
-                  <MapPin className="w-4 h-4 text-slate-500 group-hover:text-slate-900" />
+                <div className="w-10 h-10 glass-card flex items-center justify-center group-hover:bg-white transition-all">
+                  <MapPin className="w-4 h-4 text-slate-500 group-hover:text-emerald-500" />
                 </div>
                 <span className="text-sm font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-widest">Zurich, Switzerland</span>
               </li>
@@ -97,9 +97,9 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-slate-900/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3 text-emerald-400">
+            <div className="flex items-center space-x-3 text-emerald-500">
               <ShieldCheck className="w-5 h-5" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Official FIFA Marketplace</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">AUTHENTIC FIFA WORLD CUP 26™ PLATFORM</span>
             </div>
             <div className="h-4 w-px bg-slate-900/10 hidden md:block" />
             <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">
@@ -108,9 +108,9 @@ const Footer = () => {
           </div>
           
           <div className="flex items-center space-x-8">
-            <a href="#" className="text-[10px] font-black text-slate-600 hover:text-slate-900 uppercase tracking-[0.2em] transition-colors">Privacy Policy</a>
-            <a href="#" className="text-[10px] font-black text-slate-600 hover:text-slate-900 uppercase tracking-[0.2em] transition-colors">Terms of Service</a>
-            <a href="#" className="text-[10px] font-black text-slate-600 hover:text-slate-900 uppercase tracking-[0.2em] transition-colors">Cookie Settings</a>
+            <Link to="/legal" className="text-[10px] font-black text-slate-800 hover:text-emerald-500 uppercase tracking-[0.2em] transition-colors">Privacy Protocol</Link>
+            <Link to="/legal" className="text-[10px] font-black text-slate-800 hover:text-emerald-500 uppercase tracking-[0.2em] transition-colors">Terms of Service</Link>
+            <Link to="/legal" className="text-[10px] font-black text-slate-800 hover:text-emerald-500 uppercase tracking-[0.2em] transition-colors">Cookie Settings</Link>
             <button className="flex items-center space-x-2 text-[10px] font-black text-slate-600 hover:text-slate-900 uppercase tracking-[0.2em] transition-colors">
               <Globe className="w-4 h-4" />
               <span>English (US)</span>

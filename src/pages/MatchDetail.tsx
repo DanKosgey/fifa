@@ -1,34 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, ArrowLeft, ShieldCheck, Ticket, Filter, Bell, X, AlertCircle, Smartphone, Printer, Download, CreditCard, CheckCircle2, ChevronRight, Info, Globe, TrendingUp, Star, Search } from 'lucide-react';
+import { Calendar, MapPin, Clock, ArrowLeft, ShieldCheck, Ticket, Filter, Bell, X, AlertCircle, Smartphone, Printer, Download, CreditCard, CheckCircle2, ChevronRight, Info, Globe, TrendingUp, Star, Search, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import SeatMap from '../components/SeatMap';
-
-// Mock data for the match
-const MATCH_DATA = {
-  id: 'm1',
-  homeTeam: 'Brazil',
-  awayTeam: 'France',
-  date: '2026-06-15',
-  time: '20:00',
-  stadium: 'MetLife Stadium',
-  location: 'New York/New Jersey',
-  stage: 'Group Stage',
-  homeFlag: 'https://flagcdn.com/w320/br.png',
-  awayFlag: 'https://flagcdn.com/w320/fr.png',
-};
-
-interface TicketListing {
-  id: string;
-  matchId: string;
-  category: string;
-  price: number;
-  sectionId?: string;
-  row?: string;
-  seat?: string;
-  seller?: string;
-  type?: string;
-}
+import { apiService, Match, TicketListing } from '../services/api';
 
 export default function MatchDetail() {
   const { id } = useParams();
@@ -36,8 +12,9 @@ export default function MatchDetail() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [ticketQuantity, setTicketQuantity] = useState<number>(1);
   const [tickets, setTickets] = useState<TicketListing[]>([]);
+  const [match, setMatch] = useState<Match | null>(null);
   const [loading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState<{id: string, message: string}[]>([]);
+  const [notifications, setNotifications] = useState<{id: string, message: string, title?: string, type?: string, data?: any}[]>([]);
 
   // Price Alert States
   const [isPriceAlertOpen, setIsPriceAlertOpen] = useState(false);
@@ -50,29 +27,56 @@ export default function MatchDetail() {
   const [selectedTicket, setSelectedTicket] = useState<TicketListing | null>(null);
   const [checkoutStep, setCheckoutStep] = useState<'details' | 'payment' | 'success'>('details');
 
-  // Generate a random user ID for this session
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvc, setCvc] = useState("");
+  const [paymentError, setPaymentError] = useState("");
+
+  const handlePaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardNumber || !expiry || !cvc) {
+      setPaymentError("Please fill in all payment fields.");
+      return;
+    }
+    if (cardNumber.replace(/\s/g, '').length < 16) {
+      setPaymentError("Invalid card number. Must be 16 digits.");
+      return;
+    }
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) {
+      setPaymentError("Invalid expiry date format (MM/YY).");
+      return;
+    }
+    if (cvc.length < 3 || cvc.length > 4) {
+      setPaymentError("Invalid CVC.");
+      return;
+    }
+    setPaymentError("");
+    setCheckoutStep('success');
+  };
+
   const userId = useRef(`user_${Math.random().toString(36).substring(7)}`);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    // Fetch initial tickets
-    const fetchTickets = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`/api/matches/${id || 'm1'}/tickets`);
-        if (res.ok) {
-          const data = await res.json();
-          setTickets(data);
-        }
+        setLoading(true);
+        const matchId = id || 'm1';
+        const [matchData, ticketData] = await Promise.all([
+          apiService.getMatch(matchId),
+          apiService.getTickets(matchId)
+        ]);
+        setMatch(matchData);
+        setTickets(ticketData);
       } catch (error) {
-        console.error("Failed to fetch tickets:", error);
+        console.error("Failed to fetch match details:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTickets();
+    fetchData();
 
-    // Connect to WebSocket
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}?userId=${userId.current}`;
     const ws = new WebSocket(wsUrl);
@@ -87,7 +91,10 @@ export default function MatchDetail() {
         } else if (data.type === 'PRICE_DROP') {
           const newNotification = {
             id: Math.random().toString(36).substring(7),
-            message: data.payload.message
+            message: data.payload.message,
+            title: "Price Drop Alert!",
+            type: 'price_drop',
+            data: { newPrice: data.payload.newPrice }
           };
           setNotifications(prev => [...prev, newNotification]);
           setTimeout(() => {
@@ -100,24 +107,20 @@ export default function MatchDetail() {
     };
 
     return () => {
-      if (ws.readyState === WebSocket.OPEN) ws.close();
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) wsRef.current.close();
     };
   }, [id]);
 
   const handleCreateAlert = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: userId.current,
-          matchId: id || 'm1',
-          category: alertCategory,
-          maxPrice: Number(alertPrice),
-        }),
+      await apiService.createAlert({
+        userId: userId.current,
+        matchId: id || 'm1',
+        category: alertCategory,
+        maxPrice: Number(alertPrice),
       });
-      if (res.ok) setAlertSuccess(true);
+      setAlertSuccess(true);
     } catch (error) {
       console.error("Failed to create alert:", error);
     }
@@ -129,8 +132,23 @@ export default function MatchDetail() {
       : tickets;
   }, [tickets, selectedSection]);
 
+  if (loading || !match) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Syncing Match Intelligence...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900 selection:bg-emerald-500/30">
+      <Helmet>
+        <title>{match.t1} vs {match.t2} | Official Tickets</title>
+        <meta name="description" content={`Secure your official tickets for ${match.t1} vs ${match.t2} at ${match.venue}. Real-time availability and verified resale.`} />
+      </Helmet>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
         .font-mono-data { font-family: 'JetBrains Mono', monospace; }
@@ -140,6 +158,34 @@ export default function MatchDetail() {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
       `}</style>
 
+      {/* ✅ AGENT: Render WebSocket notifications dynamically as Toasts */}
+      <div className="fixed top-24 right-4 z-50 flex flex-col gap-3 pointer-events-none w-full max-w-sm px-4 md:px-0">
+        <AnimatePresence>
+          {notifications.map((note) => (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              className="bg-slate-900 text-white p-4 rounded-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] flex items-start gap-3 pointer-events-auto border border-slate-800 backdrop-blur-xl bg-opacity-95"
+            >
+              <div className="bg-emerald-500/20 p-2 rounded-lg mt-0.5 shrink-0">
+                <Bell className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-sm tracking-wide">{note.title}</h4>
+                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{note.message}</p>
+                {note.type === 'price_drop' && note.data && (
+                  <div className="mt-2 text-xs font-mono bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded inline-block border border-emerald-500/20">
+                    New Price: ${note.data.newPrice}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
       {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] animate-pulse-slow" />
@@ -147,7 +193,7 @@ export default function MatchDetail() {
       </div>
 
       {/* ── TOP NAVIGATION RAIL ──────────────────────────────── */}
-      <div className="bg-slate-50/50 backdrop-blur-xl border-b border-slate-900/10 sticky top-0 z-50">
+      <div className="bg-white/70 backdrop-blur-2xl border-b border-white/60 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <button onClick={() => navigate('/match-centre')} className="flex items-center space-x-2 group">
@@ -156,9 +202,9 @@ export default function MatchDetail() {
             </button>
           </div>
           <div className="flex items-center space-x-4">
-             <div className="flex items-center space-x-2 bg-slate-900/5 px-3 py-1.5 rounded-full border border-slate-900/10 backdrop-blur-md">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-900/60">Live Updates</span>
+             <div className="flex items-center space-x-2 glass-card px-3 py-1.5 border-white/40">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900/80">Live Updates</span>
             </div>
           </div>
         </div>
@@ -183,18 +229,18 @@ export default function MatchDetail() {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex flex-col items-center text-center"
               >
-                <div className="w-28 h-20 bg-slate-900/5 rounded-2xl shadow-2xl border border-slate-900/10 p-1 mb-6 backdrop-blur-md group hover:scale-105 transition-transform">
-                  <img src={MATCH_DATA.homeFlag} alt={MATCH_DATA.homeTeam} className="w-full h-full object-cover rounded-xl" />
+                <div className="w-28 h-20 glass-card p-1 mb-6 group hover:scale-105 transition-transform border-white/60">
+                  <img src={match.t1Flag} alt={match.t1} className="w-full h-full object-cover rounded-xl" />
                 </div>
-                <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">{MATCH_DATA.homeTeam}</h2>
-                <span className="text-[10px] font-black text-slate-900/30 uppercase tracking-[0.3em] mt-2">Host Team</span>
+                <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">{match.t1}</h2>
+                <span className="text-[10px] font-black text-slate-800 uppercase tracking-[0.4em] mt-2">HOST NATION</span>
               </motion.div>
 
               {/* VS Divider */}
               <div className="flex flex-col items-center">
                 <div className="text-5xl font-black text-slate-900/10 italic tracking-tighter mb-4">VS</div>
                 <div className="px-6 py-2 bg-emerald-500 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                  {MATCH_DATA.stage}
+                  {match.competition}
                 </div>
               </div>
 
@@ -204,11 +250,11 @@ export default function MatchDetail() {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex flex-col items-center text-center"
               >
-                <div className="w-28 h-20 bg-slate-900/5 rounded-2xl shadow-2xl border border-slate-900/10 p-1 mb-6 backdrop-blur-md group hover:scale-105 transition-transform">
-                  <img src={MATCH_DATA.awayFlag} alt={MATCH_DATA.awayTeam} className="w-full h-full object-cover rounded-xl" />
+                <div className="w-28 h-20 glass-card p-1 mb-6 group hover:scale-105 transition-transform border-white/60">
+                  <img src={match.t2Flag} alt={match.t2} className="w-full h-full object-cover rounded-xl" />
                 </div>
-                <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">{MATCH_DATA.awayTeam}</h2>
-                <span className="text-[10px] font-black text-slate-900/30 uppercase tracking-[0.3em] mt-2">Challenger</span>
+                <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">{match.t2}</h2>
+                <span className="text-[10px] font-black text-slate-800 uppercase tracking-[0.4em] mt-2">CHALLENGER</span>
               </motion.div>
             </div>
 
@@ -226,7 +272,7 @@ export default function MatchDetail() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest">Match Date</p>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{new Date(MATCH_DATA.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{new Date(match.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-5">
@@ -235,7 +281,7 @@ export default function MatchDetail() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest">Kick-off Time</p>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{MATCH_DATA.time} Local Time</p>
+                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{match.time} Local Time</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-5">
@@ -244,7 +290,7 @@ export default function MatchDetail() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest">Venue</p>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{MATCH_DATA.stadium}, {MATCH_DATA.location}</p>
+                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{match.venue}, {match.city}</p>
                   </div>
                 </div>
               </div>
@@ -262,8 +308,8 @@ export default function MatchDetail() {
             <div className="glass-card rounded-[2.5rem] p-8 sticky top-24 border border-slate-900/10 shadow-2xl shadow-emerald-500/5">
               <div className="flex items-center justify-between mb-10">
                 <div>
-                  <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">Stadium Map</h2>
-                  <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-[0.2em] mt-2">Select a section to filter tickets</p>
+                  <h2 className="text-3xl font-black tracking-tighter uppercase text-slate-900 shining-text">Venue Intelligence</h2>
+                  <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.3em] mt-2">Select a section to view live inventory</p>
                 </div>
                 <div className="flex items-center space-x-3 bg-slate-900/5 px-4 py-2 rounded-xl border border-slate-900/10 backdrop-blur-md">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -351,7 +397,7 @@ export default function MatchDetail() {
                       className="w-full pl-12 pr-4 py-4 bg-slate-900/5 border border-slate-900/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer"
                     >
                       {[1, 2, 3, 4, 5, 6].map((num) => (
-                        <option key={num} value={num} className="bg-white text-slate-900">{num} Ticket{num > 1 ? 's' : ''}</option>
+                        <option key={num} value={num} className="bg-transparent text-slate-900">{num} Ticket{num > 1 ? 's' : ''}</option>
                       ))}
                     </select>
                   </div>
@@ -469,8 +515,8 @@ export default function MatchDetail() {
                     <Globe className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black uppercase tracking-widest text-slate-900">Secure Checkout</h3>
-                    <p className="text-[10px] text-emerald-400 font-black uppercase tracking-[0.2em] mt-1">Official Resale Platform</p>
+                    <h3 className="text-lg font-black uppercase tracking-widest text-slate-900">Official Secure Checkout</h3>
+                    <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.4em] mt-1">THE OFFICIAL FIFA WORLD CUP 26™ TICKETING PLATFORM</p>
                   </div>
                 </div>
                 <button 
@@ -487,8 +533,8 @@ export default function MatchDetail() {
                     <div className="bg-slate-900/5 p-6 rounded-3xl border border-slate-900/10">
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{MATCH_DATA.homeTeam} vs {MATCH_DATA.awayTeam}</h4>
-                          <p className="text-[10px] text-slate-900/30 font-black uppercase tracking-widest mt-2">{MATCH_DATA.stadium} • {new Date(MATCH_DATA.date).toLocaleDateString()}</p>
+                          <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{match.t1} vs {match.t2}</h4>
+                          <p className="text-[10px] text-slate-900/30 font-black uppercase tracking-widest mt-2">{match.venue} • {new Date(match.date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-8 pt-6 border-t border-slate-900/5">
@@ -527,62 +573,77 @@ export default function MatchDetail() {
                   </motion.div>
                 )}
 
+                {/* Payment Step */}
                 {checkoutStep === 'payment' && (
-                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-900/30 uppercase tracking-widest mb-4">Card Details</label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                            <CreditCard className="w-5 h-5 text-slate-900/20" />
-                          </div>
+                  <motion.div
+                    key="payment"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h3 className="text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-3">
+                      <CreditCard className="w-5 h-5 text-emerald-500" />
+                      Payment Details
+                    </h3>
+                    {/* ✅ AGENT: Wired form submission and controlled inputs */}
+                    <form className="space-y-4" onSubmit={handlePaymentSubmit}>
+                      {paymentError && (
+                        <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          {paymentError}
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Card Number</label>
                           <input 
                             type="text" 
-                            placeholder="Card number"
-                            className="w-full pl-14 pr-4 py-5 bg-slate-900/5 border border-slate-900/10 rounded-t-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 text-sm font-black text-slate-900 placeholder:text-slate-900/10"
+                            value={cardNumber}
+                            onChange={(e) => setCardNumber(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-900/10 rounded-xl px-4 py-3 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono" 
+                            placeholder="0000 0000 0000 0000" 
+                            maxLength={19} // 16 digits + 3 spaces
                           />
                         </div>
-                        <div className="flex">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Expiry</label>
                           <input 
                             type="text" 
-                            placeholder="MM / YY"
-                            className="w-1/2 px-5 py-5 bg-slate-900/5 border border-slate-900/10 border-t-0 rounded-bl-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 text-sm font-black text-slate-900 placeholder:text-slate-900/10"
+                            value={expiry}
+                            onChange={(e) => setExpiry(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-900/10 rounded-xl px-4 py-3 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono" 
+                            placeholder="MM/YY" 
+                            maxLength={5}
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">CVC</label>
                           <input 
                             type="text" 
-                            placeholder="CVC"
-                            className="w-1/2 px-5 py-5 bg-slate-900/5 border border-slate-900/10 border-t-0 border-l-0 rounded-br-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 text-sm font-black text-slate-900 placeholder:text-slate-900/10"
+                            value={cvc}
+                            onChange={(e) => setCvc(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-900/10 rounded-xl px-4 py-3 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono" 
+                            placeholder="123" 
+                            maxLength={4}
                           />
                         </div>
                       </div>
-                      
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-900/30 uppercase tracking-widest mb-4">Cardholder Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="Full Name as on Card"
-                          className="w-full px-5 py-5 bg-slate-900/5 border border-slate-900/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 text-sm font-black text-slate-900 placeholder:text-slate-900/10"
-                        />
+                      <div className="pt-6">
+                        <button 
+                          type="submit"
+                          className="w-full shining-button bg-slate-900 text-white font-black uppercase tracking-[0.2em] py-4 rounded-xl flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 text-xs"
+                        >
+                          <Lock className="w-4 h-4" />
+                          <span>Pay ${((selectedTicket?.price || 0) * ticketQuantity * 1.15).toFixed(2)}</span>
+                        </button>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                      <ShieldCheck className="w-6 h-6 text-emerald-400" />
-                      <p className="text-[9px] font-black text-emerald-400/60 uppercase tracking-widest leading-relaxed">Your payment is encrypted and processed securely. We never store your card details.</p>
-                    </div>
-
-                    <div className="flex gap-4">
+                    </form>
+                    <div className="flex gap-4 mt-8">
                       <button 
                         onClick={() => setCheckoutStep('details')}
                         className="flex-1 bg-slate-900/5 text-slate-900 font-black py-6 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-slate-900/10 transition-all border border-slate-900/10"
                       >
                         Back
-                      </button>
-                      <button 
-                        onClick={() => setCheckoutStep('success')}
-                        className="flex-[2] shining-button bg-emerald-500 text-white font-black py-6 rounded-2xl uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20"
-                      >
-                        Confirm Purchase
                       </button>
                     </div>
                   </motion.div>
@@ -613,7 +674,7 @@ export default function MatchDetail() {
                       <div className="space-y-5 pt-8 border-t border-slate-900/5 relative z-10">
                         <div className="flex justify-between">
                           <span className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest">Match</span>
-                          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{MATCH_DATA.homeTeam} vs {MATCH_DATA.awayTeam}</span>
+                          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{match.t1} vs {match.t2}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest">Quantity</span>

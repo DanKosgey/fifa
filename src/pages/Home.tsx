@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, MapPin, Calendar, ChevronRight, ShieldCheck, Globe, Info, Ticket, Star, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
+import { apiService, Match, Team, NewsItem } from '../services/api';
 
 const Home = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -9,6 +11,31 @@ const Home = () => {
   const [filterDate, setFilterDate] = useState('All');
   const [filterGroup, setFilterGroup] = useState('All');
   const [filterCity, setFilterCity] = useState('All');
+  
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [rankings, setRankings] = useState<Team[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [m, r, n] = await Promise.all([
+          apiService.getMatches(),
+          apiService.getTeams(),
+          apiService.getNews()
+        ]);
+        setMatches(m);
+        setRankings(r);
+        setNews(n);
+      } catch (error) {
+        console.error("Failed to fetch home data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const targetDate = new Date('2026-06-11T00:00:00Z').getTime();
@@ -34,44 +61,33 @@ const Home = () => {
 
   const heroSlides = [
     {
-      tag: 'WE ARE 26',
-      headline: 'The Largest\nWorld Cup Ever',
-      sub: '48 teams. 104 matches. 3 host nations. The beautiful game on its biggest stage.',
+      tag: 'WE ARE 26 | OFFICIAL HUB',
+      headline: 'The Grandest\nTournament Ever',
+      sub: '48 Elite Nations. 104 Global Showdowns. 3 Host Countries. The beautiful game on its most majestic stage.',
       accent: '#10B981', // Emerald 500
       gradient: 'from-emerald-500/20 to-blue-600/20'
     },
     {
-      tag: 'HOST CITIES',
+      tag: 'THE WORLD\'S STAGE | 2026',
       headline: '16 Cities.\nOne Dream.',
-      sub: 'From Vancouver to Mexico City, North America is ready to welcome the world.',
+      sub: 'From Vancouver to Mexico City, North America prepares to host the most inclusive and expansive FIFA World Cup™ in history.',
       accent: '#F43F5E', // Rose 500
       gradient: 'from-rose-500/20 to-indigo-600/20'
     },
     {
-      tag: 'DEFENDING CHAMPIONS',
-      headline: 'Argentina Begin\nTitle Defense',
-      sub: 'La Albiceleste look to become the first back-to-back World Cup champions since Brazil in 1962.',
+      tag: 'DEFENDING THE THRONE',
+      headline: 'Argentina Defend\nTheir Title',
+      sub: 'The reigning kings of football arrive in North America. Watch as Argentina fights to solidify their legacy as the greatest dynasty in modern history.',
       accent: '#0EA5E9', // Sky 500
       gradient: 'from-sky-500/20 to-emerald-600/20'
     },
     {
-      tag: 'THE FINAL',
+      tag: 'THE PINNACLE | JULY 19',
       headline: 'New York\nNew Jersey',
-      sub: 'MetLife Stadium will host the historic FIFA World Cup 26™ Final on July 19, 2026.',
+      sub: 'MetLife Stadium will host the historic FIFA World Cup 26™ Final on July 19, 2026. The world is watching.',
       accent: '#8B5CF6', // Violet 500
       gradient: 'from-violet-500/20 to-rose-600/20'
     },
-  ];
-
-  const matches = [
-    { date: 'THU 11 JUN 2026', time: '19:00', group: 'GROUP A · MATCH 1', home: 'Mexico', homeCode: 'MEX', homeFlag: 'https://flagcdn.com/w160/mx.png', away: 'South Africa', awayCode: 'RSA', awayFlag: 'https://flagcdn.com/w160/za.png', venue: 'Estadio Azteca', city: 'Mexico City' },
-    { date: 'FRI 12 JUN 2026', time: '15:00', group: 'GROUP B · MATCH 1', home: 'USA', homeCode: 'USA', homeFlag: 'https://flagcdn.com/w160/us.png', away: 'Paraguay', awayCode: 'PAR', awayFlag: 'https://flagcdn.com/w160/py.png', venue: 'SoFi Stadium', city: 'Los Angeles' },
-    { date: 'FRI 12 JUN 2026', time: '18:00', group: 'GROUP C · MATCH 1', home: 'Canada', homeCode: 'CAN', homeFlag: 'https://flagcdn.com/w160/ca.png', away: 'UEFA PO', awayCode: 'TBD', awayFlag: '', venue: 'BMO Field', city: 'Toronto' },
-    { date: 'SAT 13 JUN 2026', time: '12:00', group: 'GROUP D · MATCH 1', home: 'Brazil', homeCode: 'BRA', homeFlag: 'https://flagcdn.com/w160/br.png', away: 'TBD', awayCode: 'TBD', awayFlag: '', venue: 'AT&T Stadium', city: 'Dallas' },
-    { date: 'SAT 13 JUN 2026', time: '15:00', group: 'GROUP E · MATCH 1', home: 'France', homeCode: 'FRA', homeFlag: 'https://flagcdn.com/w160/fr.png', away: 'TBD', awayCode: 'TBD', awayFlag: '', venue: 'MetLife Stadium', city: 'New York/New Jersey' },
-    { date: 'SUN 14 JUN 2026', time: '12:00', group: 'GROUP F · MATCH 1', home: 'Argentina', homeCode: 'ARG', homeFlag: 'https://flagcdn.com/w160/ar.png', away: 'TBD', awayCode: 'TBD', awayFlag: '', venue: 'Hard Rock Stadium', city: 'Miami' },
-    { date: 'SUN 14 JUN 2026', time: '18:00', group: 'GROUP A · MATCH 2', home: 'Mexico', homeCode: 'MEX', homeFlag: 'https://flagcdn.com/w160/mx.png', away: 'TBD', awayCode: 'TBD', awayFlag: '', venue: 'Estadio Akron', city: 'Guadalajara' },
-    { date: 'MON 15 JUN 2026', time: '15:00', group: 'GROUP B · MATCH 2', home: 'USA', homeCode: 'USA', homeFlag: 'https://flagcdn.com/w160/us.png', away: 'TBD', awayCode: 'TBD', awayFlag: '', venue: 'Lumen Field', city: 'Seattle' },
   ];
 
   const uniqueDates = ['All', ...new Set(matches.map(m => m.date))];
@@ -85,25 +101,25 @@ const Home = () => {
     return matchDate && matchGroup && matchCity;
   });
 
-  const rankings = [
-    { pos: 1, name: 'Spain', flag: '🇪🇸', pts: '1927.38', change: '+5' },
-    { pos: 2, name: 'Argentina', flag: '🇦🇷', pts: '1873.35', change: '-2' },
-    { pos: 3, name: 'France', flag: '🇫🇷', pts: '1851.93', change: '+1' },
-    { pos: 4, name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', pts: '1824.73', change: '-1' },
-    { pos: 5, name: 'Brazil', flag: '🇧🇷', pts: '1782.46', change: '0' },
-  ];
-
-  const news = [
-    { cat: 'QUALIFICATION', title: 'Only Six Spots Remain: The Nations Still Fighting for 2026', seed: 'qualify', time: '2h ago' },
-    { cat: 'TEAMS', title: 'Debutants Ready to Shine: Cape Verde, Curaçao, Jordan & Uzbekistan', seed: 'debut', time: '4h ago' },
-    { cat: 'VENUES', title: 'MetLife Stadium Prepares for the Most-Watched Final in History', seed: 'stadium', time: '6h ago' },
-    { cat: 'FEATURES', title: '28 Superstars: Cristiano Ronaldo\'s World Cup Legacy Explored', seed: 'ronaldo', time: '8h ago' },
-  ];
-
   const slide = heroSlides[activeSlide];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading Stage...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen font-sans text-slate-900">
+      <Helmet>
+        <title>FIFA World Cup 2026™ | Official Multi-Host Portal</title>
+        <meta name="description" content="Welcome to the official portal for FIFA World Cup 2026™. Explore matches, buy tickets, and stay updated with the latest news from the world's biggest tournament." />
+      </Helmet>
       {/* ── LIVE TICKER ─────────────────────────────────────── */}
       <div className="bg-slate-900/5 backdrop-blur-md py-3 overflow-hidden border-b border-slate-900/10 relative z-20">
         <div className="ticker-wrap">
@@ -157,12 +173,12 @@ const Home = () => {
               <img 
                 src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" 
                 alt="World Cup Trophy" 
-                className="absolute -right-20 top-1/2 -translate-y-1/2 h-[110%] w-auto object-contain opacity-50 pointer-events-none z-0 select-none brightness-110" 
+                className="absolute -right-20 top-1/2 -translate-y-1/2 h-[120%] w-auto object-contain pointer-events-none z-0 select-none drop-shadow-2xl" 
                 referrerPolicy="no-referrer"
               />
               <div className="relative z-10">
                 <div 
-                  className="inline-block text-slate-900 text-[11px] font-black tracking-[0.3em] uppercase px-4 py-2 rounded-lg mb-8 border border-slate-900/10 backdrop-blur-md bg-slate-900/5"
+                  className="inline-block text-slate-900 text-[11px] font-black tracking-[0.3em] uppercase px-4 py-2 rounded-lg mb-8 border border-white/60 backdrop-blur-md bg-white/40 shadow-sm"
                   style={{ borderColor: `${slide.accent}40` }}
                 >
                   {slide.tag}
@@ -170,10 +186,19 @@ const Home = () => {
                 <h1 className="text-6xl md:text-8xl font-black text-slate-900 leading-[0.88] mb-8 uppercase tracking-tighter whitespace-pre-line shining-text">
                   {slide.headline}
                 </h1>
-                <p className="text-lg text-slate-900/60 mb-12 leading-relaxed max-w-md font-medium">
+                <p className="text-xl text-slate-800 mb-12 leading-relaxed max-w-md font-semibold drop-shadow-sm">
                   {slide.sub}
                 </p>
-                {/* Removed Explore More and Match Centre buttons */}
+                {/* ✅ AGENT: Restored missing navigation buttons in Hero */}
+                <div className="flex gap-4">
+                  <Link to="/tickets" className="shining-button text-white font-black uppercase tracking-[0.3em] px-10 py-5 rounded-xl transition-all shadow-xl shadow-slate-900/20 text-[10px] inline-flex items-center gap-3">
+                    Get Tickets
+                  </Link>
+                  <Link to="/match-centre" className="group glass-card text-slate-900 font-black uppercase tracking-[0.3em] px-10 py-5 rounded-xl transition-all hover:bg-white/80 text-[10px] inline-flex items-center gap-3">
+                    Match Centre
+                    <ChevronRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -192,12 +217,12 @@ const Home = () => {
                 {i === activeSlide && (
                   <motion.div 
                     layoutId="hero-card-active"
-                    className="absolute inset-0 bg-slate-900/10 rounded-[2rem] z-0 border border-slate-900/20 shadow-[0_0_40px_rgba(255,255,255,0.05)]"
+                    className="absolute inset-0 glass-card rounded-[2rem] z-0 shadow-lg"
                     transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
                   />
                 )}
                 
-                <div className={`relative z-10 h-full w-full rounded-[2rem] overflow-hidden flex flex-col justify-end p-8 transition-all duration-500 border ${i === activeSlide ? 'border-transparent' : 'border-slate-900/5 opacity-50 hover:opacity-100'}`}>
+                <div className={`relative z-10 h-full w-full rounded-[2rem] overflow-hidden flex flex-col justify-end p-8 transition-all duration-500 border ${i === activeSlide ? 'border-transparent' : 'border-white/40 opacity-50 hover:opacity-100 bg-white/20'}`}>
                   <div className={`absolute inset-0 opacity-10 bg-gradient-to-br ${s.gradient}`} />
                   
                   {/* Progress Indicator for Active Card */}
@@ -242,10 +267,14 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
-              <div className="text-[11px] text-slate-900/40 font-black uppercase tracking-[0.3em] mb-3">FIFA World Cup 26™</div>
+              <div className="text-[11px] text-slate-800 font-black uppercase tracking-[0.4em] mb-3">FIFA World Cup 26™</div>
               <h2 className="text-4xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter shining-text">The Stage Is Set</h2>
             </div>
-            {/* Removed All Matches link */}
+            {/* ✅ AGENT: Restored All Matches navigation */}
+            <Link to="/match-centre" className="group flex items-center gap-3 bg-slate-900/5 hover:bg-slate-900/10 px-6 py-3 rounded-xl transition-all border border-slate-900/5">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">All Matches</span>
+              <ChevronRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
 
           {/* Filters */}
@@ -257,7 +286,7 @@ const Home = () => {
               <select 
                 value={filterDate} 
                 onChange={(e) => setFilterDate(e.target.value)}
-                className="w-full pl-11 pr-4 py-4 bg-slate-900/5 border border-slate-900/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-900/40 transition-all appearance-none shadow-sm backdrop-blur-md"
+                className="w-full pl-11 pr-4 py-4 glass-card border-white/60 text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none shadow-2xl"
               >
                 {uniqueDates.map(d => <option key={d} value={d} className="bg-white">{d === 'All' ? 'All Dates' : d}</option>)}
               </select>
@@ -269,7 +298,7 @@ const Home = () => {
               <select 
                 value={filterGroup} 
                 onChange={(e) => setFilterGroup(e.target.value)}
-                className="w-full pl-11 pr-4 py-4 bg-slate-900/5 border border-slate-900/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-900/40 transition-all appearance-none shadow-sm backdrop-blur-md"
+                className="w-full pl-11 pr-4 py-4 glass-card border-white/60 text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none shadow-2xl"
               >
                 {uniqueGroups.map(g => <option key={g} value={g} className="bg-white">{g === 'All' ? 'All Groups' : g}</option>)}
               </select>
@@ -281,7 +310,7 @@ const Home = () => {
               <select 
                 value={filterCity} 
                 onChange={(e) => setFilterCity(e.target.value)}
-                className="w-full pl-11 pr-4 py-4 bg-slate-900/5 border border-slate-900/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-900/40 transition-all appearance-none shadow-sm backdrop-blur-md"
+                className="w-full pl-11 pr-4 py-4 glass-card border-white/60 text-[11px] font-black uppercase tracking-widest text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none shadow-2xl"
               >
                 {uniqueCities.map(c => <option key={c} value={c} className="bg-white">{c === 'All' ? 'All Cities' : c}</option>)}
               </select>
@@ -298,9 +327,9 @@ const Home = () => {
                   transition={{ delay: i * 0.05 }}
                   className="group glass-card glass-card-hover cursor-pointer flex flex-col"
                 >
-                  <div className="px-6 py-4 border-b border-slate-900/5 flex justify-between items-center bg-slate-900/5">
-                    <span className="text-[10px] font-black text-slate-900/40 uppercase tracking-widest">{m.group}</span>
-                    <span className="text-[10px] font-bold text-slate-900/40 uppercase tracking-widest">{m.date}</span>
+                  <div className="px-6 py-4 border-b border-white/40 flex justify-between items-center bg-white/20 backdrop-blur-sm">
+                    <span className="text-[10px] font-black text-slate-900/60 uppercase tracking-widest">{m.group}</span>
+                    <span className="text-[10px] font-black text-slate-900/80 uppercase tracking-widest">{m.date}</span>
                   </div>
 
                   <div className="p-8 flex-grow flex flex-col justify-center items-center gap-8 relative overflow-hidden">
@@ -309,9 +338,9 @@ const Home = () => {
                     <div className="flex items-center justify-between w-full relative z-10">
                       <div className="flex flex-col items-center gap-3 w-[40%]">
                         <div className="w-14 h-10 rounded-lg shadow-md overflow-hidden border border-slate-900/10 bg-slate-900/5 p-0.5 group-hover:scale-110 transition-transform">
-                          <img src={m.homeFlag} alt={m.homeCode} className="w-full h-full object-cover rounded" />
+                          <img src={m.t1Flag} alt={m.t1Code} className="w-full h-full object-cover rounded" />
                         </div>
-                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{m.homeCode}</span>
+                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{m.t1Code}</span>
                       </div>
 
                       <div className="flex flex-col items-center gap-2">
@@ -323,19 +352,19 @@ const Home = () => {
 
                       <div className="flex flex-col items-center gap-3 w-[40%]">
                         <div className="w-14 h-10 rounded-lg shadow-md overflow-hidden border border-slate-900/10 bg-slate-900/5 p-0.5 group-hover:scale-110 transition-transform">
-                          {m.awayFlag ? <img src={m.awayFlag} alt={m.awayCode} className="w-full h-full object-cover rounded" /> : <div className="w-full h-full bg-slate-900/5 flex items-center justify-center"><ShieldCheck className="w-4 h-4 text-slate-900/10" /></div>}
+                          {m.t2Flag ? <img src={m.t2Flag} alt={m.t2Code} className="w-full h-full object-cover rounded" /> : <div className="w-full h-full bg-slate-900/5 flex items-center justify-center"><ShieldCheck className="w-4 h-4 text-slate-900/10" /></div>}
                         </div>
-                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{m.awayCode}</span>
+                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{m.t2Code}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="px-6 py-4 bg-slate-900/5 border-t border-slate-900/5 flex items-center justify-between">
+                  <div className="px-6 py-4 bg-white/20 backdrop-blur-sm border-t border-white/40 flex items-center justify-between">
                     <div className="flex items-center gap-2 overflow-hidden">
-                      <MapPin className="w-3.5 h-3.5 text-slate-900/40 flex-shrink-0" />
-                      <span className="text-[10px] font-bold text-slate-900/60 uppercase tracking-widest truncate">{m.venue}</span>
+                      <MapPin className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                      <span className="text-[10px] font-black text-slate-900/80 uppercase tracking-widest truncate">{m.venue}</span>
                     </div>
-                    <span className="text-[10px] font-black text-slate-900/40 uppercase tracking-widest flex-shrink-0 ml-4">{m.city}</span>
+                    <span className="text-[10px] font-black text-slate-900/60 uppercase tracking-[0.2em] flex-shrink-0 ml-4">{m.city}</span>
                   </div>
                 </motion.div>
               ))}
@@ -347,7 +376,13 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">No Matches Found</h3>
               <p className="text-sm text-slate-900/40 font-bold uppercase tracking-widest mb-8">Try adjusting your filters to explore more fixtures.</p>
-              {/* Removed Reset Filters button */}
+              {/* ✅ AGENT: Restored Reset Filters button */}
+              <button 
+                onClick={() => { setFilterDate('All'); setFilterCity('All'); setFilterGroup('All'); }}
+                className="bg-slate-900/5 hover:bg-slate-900/10 text-slate-900 font-black px-6 py-3 rounded-xl uppercase tracking-widest text-[10px] transition-all"
+              >
+                Reset Filters
+              </button>
             </div>
           )}
         </div>
@@ -356,7 +391,7 @@ const Home = () => {
       {/* ── HOSPITALITY BANNER ──────────────────────────────── */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="bg-slate-900/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden relative shadow-2xl border border-slate-900/10">
+          <div className="glass-card border-white/60 overflow-hidden relative shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
             <img 
               src="https://www.gettickets365.com/assets/img/banners/fwc2026.png" 
@@ -369,16 +404,19 @@ const Home = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="h-[2px] w-10 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                  <span className="text-[11px] text-emerald-500 font-black uppercase tracking-[0.4em]">VIP Experience</span>
+                  <span className="text-[11px] text-emerald-500 font-black uppercase tracking-[0.4em]">Official VIP Experience</span>
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter mb-6 shining-text">
-                  Official Hospitality
+                  Elite Hospitality
                 </h2>
-                <p className="text-slate-900/40 text-lg leading-relaxed max-w-2xl font-medium">
-                  Elevate your FIFA World Cup 26™ experience. Secure premium seating, world-class dining, and exclusive access with our official hospitality packages.
+                <p className="text-slate-800 text-lg leading-relaxed max-w-2xl font-bold drop-shadow-sm">
+                  The pinnacle of tournament luxury. Secure premium seating, world-class gourmet dining, and exclusive stadium access with our official hospitality programs.
                 </p>
               </div>
-              {/* Removed Explore Packages button */}
+                <Link to="/hospitality" className="shining-button bg-slate-900 text-white font-black uppercase tracking-[0.3em] px-10 py-5 rounded-xl transition-all shadow-xl shadow-slate-900/10 text-[10px] inline-flex items-center gap-3">
+                  Explore Packages
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
             </div>
           </div>
         </div>
@@ -392,21 +430,21 @@ const Home = () => {
           <div className="lg:col-span-8">
             <div className="flex justify-between items-end mb-12">
               <div>
-                <div className="text-[11px] text-slate-900/40 font-black uppercase tracking-[0.3em] mb-3">Latest Updates</div>
-                <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Top Stories</h2>
+                <div className="text-[11px] text-slate-800 font-black uppercase tracking-[0.4em] mb-3">Tournament Intelligence</div>
+                <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Breaking Coverage</h2>
               </div>
               {/* Removed See all button */}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Main story */}
-              <div className="rounded-[2rem] overflow-hidden cursor-pointer bg-slate-900/5 relative min-h-[440px] md:col-span-2 group border border-slate-900/10 backdrop-blur-md">
+              <div className="glass-card overflow-hidden cursor-pointer relative min-h-[440px] md:col-span-2 group border-white/60 shadow-2xl">
                 <img src="https://picsum.photos/seed/worldcup1974/1200/800" alt="Main Story" className="w-full h-full object-cover opacity-30 absolute inset-0 group-hover:scale-105 transition-transform duration-1000" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-10">
-                  <div className="text-[11px] text-emerald-400 font-black uppercase tracking-[0.2em] mb-4">1974 FIFA World Cup Germany™</div>
-                  <h3 className="text-4xl text-slate-900 font-black leading-[1.1] uppercase tracking-tight mb-4 group-hover:shining-text transition-all">Watch: The Flying Dutchman drops jaws in Dortmund</h3>
-                  <p className="text-slate-900/60 text-base font-medium leading-relaxed max-w-xl">Highlights of Johan Cruyff dazzling for the Netherlands in one of the most iconic matches in history.</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-12">
+                  <div className="text-[11px] text-emerald-500 font-black uppercase tracking-[0.3em] mb-4">1974 FIFA World Cup Germany™</div>
+                  <h3 className="text-4xl text-slate-900 font-black leading-[1.1] uppercase tracking-tighter mb-4 group-hover:shining-text transition-all">Watch: The Flying Dutchman drops jaws in Dortmund</h3>
+                  <p className="text-slate-800 text-base font-semibold leading-relaxed max-w-xl drop-shadow-sm">Highlights of Johan Cruyff dazzling for the Netherlands in one of the most iconic matches in history.</p>
                 </div>
               </div>
             </div>
@@ -416,29 +454,29 @@ const Home = () => {
           <div className="lg:col-span-4">
             <div className="flex justify-between items-start mb-12">
               <div>
-                <div className="text-[11px] text-slate-900/40 font-black uppercase tracking-[0.3em] mb-3">FIFA/Coca-Cola</div>
-                <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Rankings</h2>
+                <div className="text-[11px] text-slate-900 font-black uppercase tracking-[0.3em] mb-3">Official World Rankings</div>
+                <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Global Elite</h2>
               </div>
               <TrendingUp className="w-8 h-8 text-slate-900/10" />
             </div>
             
-            <div className="glass-card overflow-hidden mb-8">
+            <div className="glass-card border-white/60 overflow-hidden mb-8 shadow-2xl">
               {/* Header */}
-              <div className="grid grid-cols-[40px_1fr_80px_60px] px-6 py-4 bg-slate-900/5 border-b border-slate-900/10">
+              <div className="grid grid-cols-[40px_1fr_80px_60px] px-6 py-4 bg-white/20 border-b border-white/40">
                 {['#', 'Team', 'Pts', '+/-'].map(h => (
-                  <div key={h} className="text-[10px] font-black text-slate-900/40 uppercase tracking-widest">{h}</div>
+                  <div key={h} className="text-[10px] font-black text-slate-900/40 uppercase tracking-[0.3em]">{h}</div>
                 ))}
               </div>
               {/* Rows */}
               <div className="divide-y divide-white/5">
                 {rankings.map((r, i) => (
-                  <div key={i} className="grid grid-cols-[40px_1fr_80px_60px] px-6 py-5 items-center hover:bg-slate-900/5 transition-colors">
+                  <div key={i} className="grid grid-cols-[40px_1fr_80px_60px] px-6 py-5 items-center hover:bg-white/40 transition-colors">
                     <div className="text-sm font-black text-slate-900 font-mono-data">{r.pos}</div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{r.flag}</span>
+                      <span className="text-xl drop-shadow-sm">{r.flag}</span>
                       <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{r.name}</span>
                     </div>
-                    <div className="text-[11px] font-bold text-slate-900/60 font-mono-data">{r.pts}</div>
+                    <div className="text-[11px] font-black text-slate-900/80 font-mono-data">{r.pts}</div>
                     <div className={`text-[10px] font-black ${r.change.startsWith('+') ? 'text-emerald-500' : r.change === '0' ? 'text-slate-900/20' : 'text-rose-500'}`}>
                       {r.change.startsWith('+') ? '▲' : r.change === '0' ? '—' : '▼'} {r.change.replace(/[+-]/, '')}
                     </div>
@@ -446,7 +484,10 @@ const Home = () => {
                 ))}
               </div>
             </div>
-            {/* Removed Full Rankings List button */}
+            {/* ✅ AGENT: Changed to active Link for Rankings */}
+            <Link to="/rankings" className="w-full mt-4 flex justify-center py-4 bg-slate-900/5 hover:bg-slate-900/10 text-slate-900 font-black uppercase tracking-[0.2em] text-[10px] rounded-xl transition-all border border-slate-900/5">
+              Explore Full Rankings
+            </Link>
           </div>
         </div>
       </section>
@@ -456,10 +497,14 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <div className="text-[11px] text-slate-900/40 font-black uppercase tracking-[0.3em] mb-3">Global News</div>
-              <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Latest Stories</h2>
+              <div className="text-[11px] text-slate-800 font-black uppercase tracking-[0.3em] mb-3">Breaking Stories</div>
+              <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter shining-text">Tournament Updates</h2>
             </div>
-            {/* Removed All News button */}
+            {/* ✅ AGENT: Restored All News navigation */}
+            <Link to="/news" className="group flex items-center gap-3 bg-slate-900/5 hover:bg-slate-900/10 px-6 py-3 rounded-xl transition-all border border-slate-900/5">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">All News</span>
+              <ChevronRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {news.map((n, i) => (
@@ -495,10 +540,10 @@ const Home = () => {
               { n: '16', l: 'Host Cities', sub: 'Across 3 nations' },
               { n: '39', l: 'Days', sub: 'Jun 11 – Jul 19, 2026' },
             ].map((s, i) => (
-              <div key={i} className="text-center p-10 bg-slate-900/5 backdrop-blur-xl rounded-[2.5rem] border border-slate-900/10 shadow-2xl group hover:bg-slate-900/10 transition-all">
-                <div className="text-7xl md:text-8xl font-black text-slate-900 leading-none mb-4 tracking-tighter group-hover:shining-text transition-all">{s.n}</div>
-                <div className="text-[13px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-4">{s.l}</div>
-                <div className="text-[11px] text-slate-900/40 font-bold uppercase tracking-widest leading-relaxed">{s.sub}</div>
+              <div key={i} className="text-center p-12 glass-card border-white/60 shadow-2xl group hover:bg-white transition-all active:scale-95">
+                <div className="text-7xl md:text-8xl font-black text-slate-900 leading-none mb-6 tracking-tighter group-hover:shining-text transition-all">{s.n}</div>
+                <div className="text-[13px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-4">{s.l}</div>
+                <div className="text-[11px] text-slate-900/60 font-black uppercase tracking-widest leading-relaxed drop-shadow-sm">{s.sub}</div>
               </div>
             ))}
           </div>
@@ -513,9 +558,10 @@ const Home = () => {
             <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">FIFA World Cup 26™ Official Platform</span>
           </div>
           <div className="flex gap-8">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Settings', 'Contact Us'].map(link => (
-              <a key={link} href="#" className="text-[10px] font-bold uppercase tracking-widest text-slate-900/40 hover:text-slate-900 transition-colors">{link}</a>
-            ))}
+            <Link to="/privacy-policy" className="text-[10px] font-bold uppercase tracking-widest text-slate-900/40 hover:text-slate-900 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-[10px] font-bold uppercase tracking-widest text-slate-900/40 hover:text-slate-900 transition-colors">Terms of Service</Link>
+            <Link to="/cookie-settings" className="text-[10px] font-bold uppercase tracking-widest text-slate-900/40 hover:text-slate-900 transition-colors">Cookie Settings</Link>
+            <Link to="/support" className="text-[10px] font-bold uppercase tracking-widest text-slate-900/40 hover:text-slate-900 transition-colors">Contact Us</Link>
           </div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-slate-900/20">
             © 2026 FIFA. All Rights Reserved.

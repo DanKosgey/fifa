@@ -1,6 +1,8 @@
 import React from 'react';
-import { Trophy, Calendar, MapPin, Users, ChevronRight, Star, Globe, ShieldCheck, Info, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom'; // ✅ AGENT: Added missing Link import
+import { Trophy, Calendar, MapPin, Users, ChevronRight, Globe, TrendingUp, Award, ExternalLink, Star, ShieldCheck } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 
 const Tournaments = () => {
   const tournaments = [
@@ -41,6 +43,10 @@ const Tournaments = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900 selection:bg-emerald-500/30">
+      <Helmet>
+        <title>Tournaments | FIFA World Cup 2026™ Stadiums & Cities</title>
+        <meta name="description" content="Explore every FIFA World Cup 2026™ tournament, host city, and stadium. Plan your journey across Canada, Mexico, and the USA." />
+      </Helmet>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
         .font-mono-data { font-family: 'JetBrains Mono', monospace; }
@@ -71,10 +77,10 @@ const Tournaments = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center space-x-3 bg-slate-900/5 backdrop-blur-xl px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-slate-900/10 mb-10"
+            className="inline-flex items-center space-x-3 glass-card px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border-white/60 mb-10 shadow-2xl"
           >
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="text-slate-900/60">Global Tournament Hub</span>
+            <Trophy className="w-4 h-4 text-emerald-500" />
+            <span className="text-slate-900/80">Global Tournament Hub</span>
           </motion.div>
           
           <motion.h1 
@@ -83,17 +89,17 @@ const Tournaments = () => {
             transition={{ delay: 0.1 }}
             className="text-6xl md:text-9xl font-black uppercase tracking-tighter mb-8 leading-[0.85] text-slate-900"
           >
-            Elite <span className="shining-text text-emerald-400">Football</span><br />
-            <span className="text-blue-500">Tournaments</span>
+            The <span className="shining-text text-emerald-400">World's</span><br />
+            <span className="text-blue-500">Stage</span>
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-slate-900/40 max-w-2xl font-bold mb-16 leading-relaxed uppercase tracking-wide"
+            className="text-xl text-slate-900 max-w-2xl font-black mb-16 leading-relaxed uppercase tracking-widest drop-shadow-sm"
           >
-            From the FIFA World Cup to continental championships, explore the most prestigious tournaments in world football.
+            The pinnacle of international football. Explore the world's most prestigious tournaments, from the historic FIFA World Cup™ to elite continental showdowns.
           </motion.p>
           
           <motion.div 
@@ -156,10 +162,10 @@ const Tournaments = () => {
               {/* Content Side */}
               <div className="w-full lg:w-1/2 space-y-10">
                 <div>
-                  <h2 className="text-5xl md:text-7xl font-black text-slate-900 uppercase tracking-tighter mb-6 leading-[0.85] group-hover:text-emerald-400 transition-colors duration-300">
+                  <h2 className="text-5xl md:text-7xl font-black text-slate-900 uppercase tracking-tighter mb-6 leading-[0.85] group-hover:shining-text transition-colors duration-300">
                     {tournament.name}
                   </h2>
-                  <p className="text-lg text-slate-900/40 font-bold uppercase tracking-wide leading-relaxed">
+                  <p className="text-lg text-slate-800 font-bold uppercase tracking-wide leading-relaxed">
                     {tournament.description}
                   </p>
                 </div>
@@ -204,10 +210,13 @@ const Tournaments = () => {
                 </div>
 
                 <div className="pt-6">
-                  <button className="shining-button bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-12 py-5 rounded-2xl transition-all shadow-2xl shadow-emerald-900/20 text-[10px] flex items-center space-x-5 group/btn">
-                    <span>View Tournament Details</span>
-                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
+                  {/* ✅ AGENT: Wrapped tournament details button in Link to restore navigation functionality */}
+                  <Link to="/match-centre" className="inline-block">
+                    <button className="shining-button bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-12 py-5 rounded-2xl transition-all shadow-2xl shadow-emerald-900/20 text-[10px] flex items-center space-x-5 group/btn">
+                      <span>View Tournament Details</span>
+                      <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -220,8 +229,8 @@ const Tournaments = () => {
         <div className="absolute inset-0 bg-emerald-500/5 backdrop-blur-3xl z-0" />
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-24">
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter mb-8 leading-none">Global Football <span className="text-emerald-500">Impact</span></h2>
-            <p className="text-slate-900/30 font-bold uppercase tracking-widest text-sm">The 2026 World Cup is set to break all previous records for attendance, viewership, and economic impact.</p>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter mb-8 leading-none">The 2026 <span className="text-emerald-500">Legacy</span></h2>
+            <p className="text-slate-800 font-bold uppercase tracking-[0.2em] text-sm max-w-2xl mx-auto leading-relaxed">A tournament of unprecedented scale. The FIFA World Cup 2026™ is set to redefine global sports, breaking every record in attendance, viewership, and economic impact.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
@@ -256,7 +265,7 @@ const Tournaments = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-4">Official Partner</h3>
-                <p className="text-slate-900/30 text-sm leading-relaxed font-bold uppercase tracking-wide">We work directly with tournament organizers to ensure official ticket distribution and verified resale.</p>
+                <p className="text-slate-800 text-sm leading-relaxed font-bold uppercase tracking-wide">We work directly with tournament organizers to ensure official ticket distribution and verified 100% secure resale.</p>
               </div>
             </div>
             <div className="glass-card p-10 rounded-[2.5rem] border border-slate-900/10 space-y-8 group hover:border-blue-500/30 transition-all duration-500">

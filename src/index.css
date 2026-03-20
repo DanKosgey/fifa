@@ -12,6 +12,10 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   
+  /* Typography Scale Overrides */
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  
   @keyframes shine {
     0% { background-position: -200% center; }
     100% { background-position: 200% center; }
@@ -24,25 +28,62 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500/30;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased text-base leading-relaxed;
+  }
+  
+  /* Selection & Scrollbars */
+  ::selection {
+    @apply bg-emerald-500/30 text-emerald-950;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-900/10 rounded-full transition-colors;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-900/20;
+  }
+
+  /* Typography Fixes */
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+  
+  /* Focus States */
+  :focus-visible {
+    @apply outline-none ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-slate-50 transition-shadow;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-slate-900/5 backdrop-blur-xl border border-slate-900/10 rounded-3xl transition-all duration-300;
+    @apply relative bg-white/70 backdrop-blur-2xl border border-white/80 rounded-3xl transition-all duration-300 ease-out shadow-[0_12px_40px_rgba(0,0,0,0.06)];
+  }
+  
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 rounded-[inherit] pointer-events-none;
+    background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 40%);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
   }
   
   .glass-card-hover {
-    @apply hover:bg-slate-900/10 hover:border-slate-900/20 hover:shadow-2xl hover:shadow-emerald-500/10;
+    @apply hover:bg-white/90 hover:border-white hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)] hover:-translate-y-1;
   }
 
   .shining-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-200 to-white bg-[length:200%_auto] animate-shine;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-800 via-emerald-500 to-emerald-800 bg-[length:200%_auto] animate-shine;
   }
 
   .shining-button {
-    @apply relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20;
+    @apply relative overflow-hidden bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-black uppercase tracking-widest transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-emerald-500/30 border border-white/60;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .shining-button::after {

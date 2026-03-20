@@ -4,6 +4,79 @@ import { WebSocketServer, WebSocket } from "ws";
 import path from "path";
 
 // Mock Database
+interface Match {
+  id: string;
+  date: string;
+  time: string;
+  t1: string;
+  t1Code: string;
+  t1Flag: string;
+  t2: string;
+  t2Code: string;
+  t2Flag: string;
+  s1: string;
+  s2: string;
+  status: string;
+  competition: string;
+  group: string;
+  venue: string;
+  city: string;
+}
+
+export interface Team {
+  id: string;
+  code: string;
+  name: string;
+  flag: string;
+  pts: string;
+  change: string;
+  pos: number;
+  region: string;
+  pot: number;
+}
+
+interface NewsItem {
+  id: string;
+  cat: string;
+  title: string;
+  seed: string;
+  time: string;
+}
+
+let matches: Match[] = [
+  { id: 'm1', date: '2026-06-11', time: "19:00", t1: "Mexico", t1Code: "MEX", t1Flag: 'https://flagcdn.com/w160/mx.png', t2: "South Africa", t2Code: "RSA", t2Flag: 'https://flagcdn.com/w160/za.png', s1: "0", s2: "0", status: "LIVE", competition: "FIFA World Cup 2026™", group: "Group A", venue: "Estadio Azteca", city: "Mexico City" },
+  { id: 'm2', date: '2026-06-12', time: "15:00", t1: "USA", t1Code: "USA", t1Flag: 'https://flagcdn.com/w160/us.png', t2: "Paraguay", t2Code: "PAR", t2Flag: 'https://flagcdn.com/w160/py.png', s1: "2", s2: "1", status: "FT", competition: "FIFA World Cup 2026™", group: "Group B", venue: "SoFi Stadium", city: "Los Angeles" },
+  { id: 'm3', date: '2026-06-12', time: "18:00", t1: "Canada", t1Code: "CAN", t1Flag: 'https://flagcdn.com/w160/ca.png', t2: "Norway", t2Code: "NOR", t2Flag: 'https://flagcdn.com/w160/no.png', s1: "1", s2: "1", status: "75'", competition: "FIFA World Cup 2026™", group: "Group C", venue: "BMO Field", city: "Toronto" },
+  { id: 'm4', date: '2026-06-13', time: "12:00", t1: "Brazil", t1Code: "BRA", t1Flag: 'https://flagcdn.com/w160/br.png', t2: "Japan", t2Code: "JPN", t2Flag: 'https://flagcdn.com/w160/jp.png', s1: "3", s2: "0", status: "FT", competition: "FIFA World Cup 2026™", group: "Group D", venue: "AT&T Stadium", city: "Dallas" },
+  { id: 'm5', date: '2026-06-13', time: "15:00", t1: "France", t1Code: "FRA", t1Flag: 'https://flagcdn.com/w160/fr.png', t2: "Morocco", t2Code: "MAR", t2Flag: 'https://flagcdn.com/w160/ma.png', s1: "0", s2: "0", status: "15'", competition: "FIFA World Cup 2026™", group: "Group E", venue: "MetLife Stadium", city: "New York/New Jersey" },
+  { id: 'm6', date: '2026-06-14', time: "12:00", t1: "Argentina", t1Code: "ARG", t1Flag: 'https://flagcdn.com/w160/ar.png', t2: "South Korea", t2Code: "KOR", t2Flag: 'https://flagcdn.com/w160/kr.png', s1: "2", s2: "0", status: "FT", competition: "FIFA World Cup 2026™", group: "Group F", venue: "Hard Rock Stadium", city: "Miami" },
+  { id: 'm7', date: '2026-06-14', time: "18:00", t1: "Spain", t1Code: "ESP", t1Flag: 'https://flagcdn.com/w160/es.png', t2: "Australia", t2Code: "AUS", t2Flag: 'https://flagcdn.com/w160/au.png', s1: "1", s2: "2", status: "60'", competition: "FIFA World Cup 2026™", group: "Group G", venue: "Estadio Akron", city: "Guadalajara" },
+  { id: 'm8', date: '2026-06-15', time: "21:00", t1: "England", t1Code: "ENG", t1Flag: 'https://flagcdn.com/w160/gb-eng.png', t2: "Egypt", t2Code: "EGY", t2Flag: 'https://flagcdn.com/w160/eg.png', s1: "0", s2: "0", status: "UPCOMING", competition: "FIFA World Cup 2026™", group: "Group H", venue: "Lumen Field", city: "Seattle" },
+  { id: 'm9', date: '2026-06-15', time: "14:00", t1: "Germany", t1Code: "GER", t1Flag: 'https://flagcdn.com/w160/de.png', t2: "Uruguay", t2Code: "URU", t2Flag: 'https://flagcdn.com/w160/uy.png', s1: "1", s2: "0", status: "HT", competition: "FIFA World Cup 2026™", group: "Group I", venue: "BC Place", city: "Vancouver" },
+];
+
+let teams: Team[] = [
+  { id: '1', code: 'ARG', name: 'Argentina', flag: '🇦🇷', pts: '1855.20', change: '0', pos: 1, region: 'CONMEBOL', pot: 1 },
+  { id: '2', code: 'FRA', name: 'France', flag: '🇫🇷', pts: '1840.59', change: '+1', pos: 2, region: 'UEFA', pot: 1 },
+  { id: '3', code: 'BRA', name: 'Brazil', flag: '🇧🇷', pts: '1837.56', change: '-1', pos: 3, region: 'CONMEBOL', pot: 1 },
+  { id: '4', code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', pts: '1807.88', change: '0', pos: 4, region: 'UEFA', pot: 1 },
+  { id: '5', code: 'BEL', name: 'Belgium', flag: '🇧🇪', pts: '1792.64', change: '0', pos: 5, region: 'UEFA', pot: 1 },
+  { id: '11', code: 'USA', name: 'USA', flag: '🇺🇸', pts: '1665.27', change: '+2', pos: 11, region: 'CONCACAF', pot: 1 },
+  { id: '12', code: 'MEX', name: 'Mexico', flag: '🇲🇽', pts: '1661.46', change: '0', pos: 12, region: 'CONCACAF', pot: 1 },
+  { id: '13', code: 'MAR', name: 'Morocco', flag: '🇲🇦', pts: '1658.49', change: '-1', pos: 13, region: 'CAF', pot: 2 },
+  { id: '18', code: 'JPN', name: 'Japan', flag: '🇯🇵', pts: '1614.33', change: '+1', pos: 18, region: 'AFC', pot: 2 },
+  { id: '20', code: 'SEN', name: 'Senegal', flag: '🇸🇳', pts: '1594.31', change: '0', pos: 20, region: 'CAF', pot: 3 },
+  { id: '21', code: 'KOR', name: 'South Korea', flag: '🇰🇷', pts: '1580.00', change: '0', pos: 21, region: 'AFC', pot: 3 },
+  { id: '22', code: 'AUS', name: 'Australia', flag: '🇦🇺', pts: '1570.00', change: '0', pos: 22, region: 'AFC', pot: 3 },
+];
+
+let news: NewsItem[] = [
+  { id: 'n1', cat: 'QUALIFICATION', title: 'Only Six Spots Remain: The Nations Still Fighting for 2026', seed: 'qualify', time: '2h ago' },
+  { id: 'n2', cat: 'TEAMS', title: 'Debutants Ready to Shine: Cape Verde, Curaçao, Jordan & Uzbekistan', seed: 'debut', time: '4h ago' },
+  { id: 'n3', cat: 'VENUES', title: 'MetLife Stadium Prepares for the Most-Watched Final in History', seed: 'stadium', time: '6h ago' },
+  { id: 'n4', cat: 'FEATURES', title: '28 Superstars: Cristiano Ronaldo\'s World Cup Legacy Explored', seed: 'ronaldo', time: '8h ago' },
+];
+
 interface TicketListing {
   id: string;
   matchId: string;
@@ -36,175 +109,91 @@ let listings: TicketListing[] = [
 ];
 
 let alerts: PriceAlert[] = [];
-
-// Connected clients for real-time notifications
 const clients = new Map<string, WebSocket>();
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
-
   app.use(express.json());
 
-  // API Routes
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
-  });
+  app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+  app.get("/api/matches", (req, res) => res.json(matches));
+  app.get("/api/teams", (req, res) => res.json(teams));
+  app.get("/api/news", (req, res) => res.json(news));
 
   app.get("/api/matches/:id/tickets", (req, res) => {
     const matchId = req.params.id;
-    const matchListings = listings.filter((l) => l.matchId === matchId);
-    res.json(matchListings);
+    res.json(listings.filter((l) => l.matchId === matchId));
   });
 
   app.post("/api/alerts", (req, res) => {
     const { userId, matchId, category, maxPrice } = req.body;
-    
-    if (!userId || !matchId || !category || !maxPrice) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const newAlert: PriceAlert = {
-      id: Math.random().toString(36).substring(7),
-      userId,
-      matchId,
-      category,
-      maxPrice: Number(maxPrice),
-    };
-
+    if (!userId || !matchId || !category || !maxPrice) return res.status(400).json({ error: "Missing fields" });
+    const newAlert = { id: Math.random().toString(36).substring(7), userId, matchId, category, maxPrice: Number(maxPrice) };
     alerts.push(newAlert);
     res.status(201).json(newAlert);
   });
 
-  app.get("/api/alerts/:userId", (req, res) => {
-    const userAlerts = alerts.filter((a) => a.userId === req.params.userId);
-    res.json(userAlerts);
-  });
-
+  app.get("/api/alerts/:userId", (req, res) => res.json(alerts.filter((a) => a.userId === req.params.userId)));
   app.delete("/api/alerts/:id", (req, res) => {
     alerts = alerts.filter((a) => a.id !== req.params.id);
     res.json({ success: true });
   });
 
-  // Vite middleware for development
+  // Explicitly handle unknown /api routes
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({ error: `API route ${req.path} not found` });
+  });
+
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
+    const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+    app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
 
-  const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-
-  // WebSocket Server
+  const server = app.listen(PORT, "0.0.0.0", () => console.log(`Server running on http://localhost:${PORT}`));
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws, req) => {
-    // In a real app, authenticate the user. Here we just take a userId from query params
     const url = new URL(req.url || "", `http://${req.headers.host}`);
     const userId = url.searchParams.get("userId");
-
     if (userId) {
       clients.set(userId, ws);
-      
-      ws.on("close", () => {
-        clients.delete(userId);
-      });
+      ws.on("close", () => clients.delete(userId));
     }
   });
 
-  // Background task to simulate price drops
   setInterval(() => {
-    let priceDropped = false;
-    
-    // Randomly drop a price for a listing
     if (Math.random() > 0.5) {
-      const listingIndex = Math.floor(Math.random() * listings.length);
-      const listing = listings[listingIndex];
-      
-      // Drop price by 5-15%
-      const dropAmount = listing.price * (0.05 + Math.random() * 0.1);
-      const newPrice = Math.max(50, Math.floor(listing.price - dropAmount));
-      
+      const listing = listings[Math.floor(Math.random() * listings.length)];
+      const newPrice = Math.max(50, Math.floor(listing.price * (0.85 + Math.random() * 0.1)));
       if (newPrice < listing.price) {
         listing.price = newPrice;
-        priceDropped = true;
-        
-        // Check alerts
-        const triggeredAlerts = alerts.filter(
-          (a) => a.matchId === listing.matchId && (a.category === 'Any' || a.category === listing.category) && a.maxPrice >= newPrice
-        );
-
-        triggeredAlerts.forEach((alert) => {
+        const triggered = alerts.filter(a => a.matchId === listing.matchId && (a.category === 'Any' || a.category === listing.category) && a.maxPrice >= newPrice);
+        triggered.forEach(alert => {
           const client = clients.get(alert.userId);
           if (client && client.readyState === WebSocket.OPEN) {
-            client.send(
-              JSON.stringify({
-                type: "PRICE_DROP",
-                payload: {
-                  alertId: alert.id,
-                  matchId: listing.matchId,
-                  category: listing.category,
-                  newPrice: newPrice,
-                  message: `Price drop alert! ${listing.category} tickets are now $${newPrice}.`,
-                },
-              })
-            );
+            client.send(JSON.stringify({ type: "PRICE_DROP", payload: { alertId: alert.id, matchId: listing.matchId, category: listing.category, newPrice, message: `Price drop alert! ${listing.category} tickets are now $${newPrice}.` } }));
           }
-          
-          // Remove alert after triggering (one-time alert)
-          alerts = alerts.filter((a) => a.id !== alert.id);
+          alerts = alerts.filter(a => a.id !== alert.id);
         });
+        clients.forEach(client => { if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify({ type: "LISTINGS_UPDATE", payload: listings })); });
       }
     }
-    
-    // Broadcast updated listings to all clients if prices changed
-    if (priceDropped) {
-      clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(
-            JSON.stringify({
-              type: "LISTINGS_UPDATE",
-              payload: listings,
-            })
-          );
-        }
-      });
-    }
-  }, 5000); // Check every 5 seconds
+  }, 5000);
 
-  // Background task to simulate score updates
   setInterval(() => {
-    const matchIds = ['m1', 'm3', 'm5', 'm7', 'm9']; // Only update matches that could be live
-    const randomMatchId = matchIds[Math.floor(Math.random() * matchIds.length)];
-    
-    // Simulate a goal
-    const s1 = Math.floor(Math.random() * 4);
-    const s2 = Math.floor(Math.random() * 4);
-    
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          type: 'SCORE_UPDATE',
-          payload: {
-            matchId: randomMatchId,
-            s1: s1.toString(),
-            s2: s2.toString(),
-            status: 'LIVE'
-          }
-        }));
-      }
-    });
-  }, 8000); // Update a score every 8 seconds
+    const m = matches[Math.floor(Math.random() * matches.length)];
+    if (m.status === 'FT' || m.status === 'UPCOMING') return;
+    const s1 = (parseInt(m.s1) + (Math.random() > 0.9 ? 1 : 0)).toString();
+    const s2 = (parseInt(m.s2) + (Math.random() > 0.9 ? 1 : 0)).toString();
+    m.s1 = s1; m.s2 = s2;
+    wss.clients.forEach(client => { if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify({ type: 'SCORE_UPDATE', payload: { matchId: m.id, s1, s2, status: m.status } })); });
+  }, 8000);
 }
 
 startServer();

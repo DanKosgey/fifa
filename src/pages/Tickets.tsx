@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, MapPin, Calendar, ShieldCheck, Ticket, X, Check, ChevronRight, Info, Star, TrendingUp, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
+import { apiService, Match } from '../services/api';
 
 const Tickets = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -9,105 +11,49 @@ const Tickets = () => {
   const [filterResale, setFilterResale] = useState(true);
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("price-low");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const matches = [
-    {
-      id: 1,
-      team1: "Argentina",
-      team2: "France",
-      team1Flag: "https://flagcdn.com/w160/ar.png",
-      team2Flag: "https://flagcdn.com/w160/fr.png",
-      date: "15 Jun 2026",
-      time: "20:00",
-      venue: "MetLife Stadium, New York/New Jersey",
-      stage: "Group Stage",
-      startingPrice: 150,
-      availableTickets: 342,
-      hasOfficial: true,
-      hasResale: true,
-    },
-    {
-      id: 2,
-      team1: "USA",
-      team2: "England",
-      team1Flag: "https://flagcdn.com/w160/us.png",
-      team2Flag: "https://flagcdn.com/w160/gb-eng.png",
-      date: "18 Jun 2026",
-      time: "18:00",
-      venue: "SoFi Stadium, Los Angeles",
-      stage: "Group Stage",
-      startingPrice: 200,
-      availableTickets: 128,
-      hasOfficial: false,
-      hasResale: true,
-    },
-    {
-      id: 3,
-      team1: "Brazil",
-      team2: "Spain",
-      team1Flag: "https://flagcdn.com/w160/br.png",
-      team2Flag: "https://flagcdn.com/w160/es.png",
-      date: "22 Jun 2026",
-      time: "21:00",
-      venue: "Azteca Stadium, Mexico City",
-      stage: "Group Stage",
-      startingPrice: 180,
-      availableTickets: 512,
-      hasOfficial: true,
-      hasResale: false,
-    },
-    {
-      id: 4,
-      team1: "Germany",
-      team2: "Japan",
-      team1Flag: "https://flagcdn.com/w160/de.png",
-      team2Flag: "https://flagcdn.com/w160/jp.png",
-      date: "25 Jun 2026",
-      time: "19:00",
-      venue: "Hard Rock Stadium, Miami",
-      stage: "Round of 32",
-      startingPrice: 250,
-      availableTickets: 89,
-      hasOfficial: true,
-      hasResale: true,
-    },
-    {
-      id: 5,
-      team1: "Portugal",
-      team2: "Morocco",
-      team1Flag: "https://flagcdn.com/w160/pt.png",
-      team2Flag: "https://flagcdn.com/w160/ma.png",
-      date: "28 Jun 2026",
-      time: "20:30",
-      venue: "Lumen Field, Seattle",
-      stage: "Round of 16",
-      startingPrice: 350,
-      availableTickets: 45,
-      hasOfficial: false,
-      hasResale: true,
-    }
-  ];
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const data = await apiService.getMatches();
+        setMatches(data);
+      } catch (error) {
+        console.error("Failed to fetch matches for tickets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMatches();
+  }, []);
 
   const filteredMatches = useMemo(() => {
     return matches.filter(match => {
       const matchesSearch = 
-        match.team1.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        match.team2.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.t1.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.t2.toLowerCase().includes(searchQuery.toLowerCase()) ||
         match.venue.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesType = (filterOfficial && match.hasOfficial) || (filterResale && match.hasResale);
+      // Mocking availability flags for now as they aren't in the Match interface yet
+      // but we can assume all matches have at least one type in this prototype
+      const hasOfficial = true; 
+      const hasResale = true;
+      const matchesType = (filterOfficial && hasOfficial) || (filterResale && hasResale);
       
-      const matchesStage = selectedStages.length === 0 || selectedStages.includes(match.stage);
+      const matchesStage = selectedStages.length === 0 || selectedStages.includes(match.competition) || selectedStages.includes(match.group);
       
       return matchesSearch && matchesType && matchesStage;
     }).sort((a, b) => {
-      if (sortBy === "price-low") return a.startingPrice - b.startingPrice;
-      if (sortBy === "price-high") return b.startingPrice - a.startingPrice;
-      if (sortBy === "tickets-low") return a.availableTickets - b.availableTickets;
-      if (sortBy === "tickets-high") return b.availableTickets - a.availableTickets;
+      // Prices are mocked for the list view since they aren't in the Match interface
+      const pA = 150 + (parseInt(a.id.replace(/\D/g, '') || '0') * 20);
+      const pB = 150 + (parseInt(b.id.replace(/\D/g, '') || '0') * 20);
+      
+      if (sortBy === "price-low") return pA - pB;
+      if (sortBy === "price-high") return pB - pA;
       return 0;
     });
-  }, [searchQuery, filterOfficial, filterResale, selectedStages, sortBy]);
+  }, [matches, searchQuery, filterOfficial, filterResale, selectedStages, sortBy]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -133,6 +79,10 @@ const Tickets = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900 selection:bg-emerald-500/30">
+      <Helmet>
+        <title>Tickets | FIFA World Cup 2026™ Official Sales</title>
+        <meta name="description" content="Secure your seat at the world's biggest event. Official ticket sales and secure resale platform for FIFA World Cup 2026™." />
+      </Helmet>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
         .font-mono-data { font-family: 'JetBrains Mono', monospace; }
@@ -171,7 +121,7 @@ const Tickets = () => {
             className="inline-flex items-center space-x-3 bg-slate-900/5 backdrop-blur-xl px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-slate-900/10 mb-10"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span className="text-slate-900/60">Official & Verified Resale Marketplace</span>
+            <span className="text-slate-900 font-black">OFFICIAL FIFA WORLD CUP 26™ TICKETING PLATFORM</span>
           </motion.div>
           
           <motion.h1 
@@ -188,9 +138,9 @@ const Tickets = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-slate-900/40 max-w-2xl font-bold mb-16 leading-relaxed uppercase tracking-wide"
+            className="text-xl text-slate-800 max-w-2xl font-semibold mb-16 leading-relaxed drop-shadow-sm"
           >
-            Buy official tickets directly or shop verified resale tickets from other fans. 100% guaranteed entry to the biggest sporting event in history.
+            Secure your place in history. From official releases to our verified fan-to-fan marketplace, every ticket is 100% guaranteed for the world’s biggest sporting event.
           </motion.p>
           
           {/* Search Bar */}
@@ -215,7 +165,11 @@ const Tickets = () => {
                 </button>
               )}
             </div>
-            <button className="shining-button bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-12 py-6 rounded-[1.5rem] hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 text-[10px]">
+            {/* ✅ AGENT: Wired up Find Tickets button to smoothly scroll to the match listings */}
+            <button 
+              onClick={() => document.getElementById('matches-list')?.scrollIntoView({ behavior: 'smooth' })}
+              className="shining-button bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-12 py-6 rounded-[1.5rem] hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 text-[10px]"
+            >
               Find Tickets
             </button>
           </motion.div>
@@ -223,7 +177,8 @@ const Tickets = () => {
       </section>
 
       {/* ── MAIN CONTENT ────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-24 relative z-10">
+      {/* ✅ AGENT: Added id="matches-list" to serve as the smooth scroll translation target */}
+      <section id="matches-list" className="max-w-7xl mx-auto px-4 md:px-8 py-24 relative z-10">
         <div className="flex flex-col lg:flex-row gap-16">
           
           {/* Filters Sidebar */}
@@ -302,12 +257,12 @@ const Tickets = () => {
                   </div>
                 </div>
 
-                <div className="bg-slate-900/5 p-6 rounded-2xl border border-slate-900/10">
+                <div className="glass-card p-6 border-white/60">
                   <div className="flex items-center gap-3 mb-4">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Buyer Protection</span>
                   </div>
-                  <p className="text-[10px] text-slate-900/30 leading-relaxed font-bold uppercase tracking-widest">
+                  <p className="text-[10px] text-slate-800 leading-relaxed font-bold uppercase tracking-widest">
                     All tickets are 100% verified. Our guarantee ensures you'll get your tickets in time for the match.
                   </p>
                 </div>
@@ -320,12 +275,12 @@ const Tickets = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-8">
               <div>
                 <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-2">Available Matches</h2>
-                <span className="text-[10px] text-slate-900/20 font-black uppercase tracking-[0.3em]">Showing {filteredMatches.length} matches in current view</span>
+                <span className="text-[10px] text-slate-800 font-black uppercase tracking-[0.4em]">LIVE INVENTORY: {filteredMatches.length} FIXTURES AVAILABLE</span>
               </div>
               
-              <div className="flex items-center space-x-4 bg-slate-900/5 border border-slate-900/10 rounded-2xl px-6 py-4 backdrop-blur-xl">
-                <Filter className="w-4 h-4 text-slate-900/20" />
-                <span className="text-[10px] font-black text-slate-900/20 uppercase tracking-[0.2em]">Sort:</span>
+              <div className="flex items-center space-x-4 glass-card px-6 py-4 border-white/60">
+                <Filter className="w-4 h-4 text-slate-900/40" />
+                <span className="text-[10px] font-black text-slate-900/40 uppercase tracking-[0.2em]">Sort:</span>
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -340,86 +295,93 @@ const Tickets = () => {
             </div>
 
             <div className="space-y-8">
-              <AnimatePresence mode="popLayout">
-                {filteredMatches.length > 0 ? (
-                  filteredMatches.map((match) => (
-                    <motion.div 
-                      key={match.id}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      className="group glass-card rounded-[2.5rem] shadow-2xl border border-slate-900/10 overflow-hidden hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all flex flex-col md:flex-row"
-                    >
-                      {/* Match Info */}
-                      <div className="p-10 flex-grow border-b md:border-b-0 md:border-r border-slate-900/5">
-                        <div className="flex items-center space-x-4 mb-8">
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400 bg-emerald-500/10 px-4 py-1.5 rounded-xl border border-emerald-500/20">{match.stage}</span>
-                          <div className="flex items-center space-x-3 text-[10px] font-black text-slate-900/30 uppercase tracking-[0.2em]">
-                            <Calendar className="w-4 h-4 text-blue-500" />
-                            <span>{match.date} • {match.time}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mb-10">
-                          <div className="flex items-center space-x-8 w-[45%]">
-                            <div className="w-16 h-10 bg-slate-900/5 rounded-xl overflow-hidden border border-slate-900/10 shadow-xl p-1">
-                              <img src={match.team1Flag} alt={match.team1} className="w-full h-full object-cover rounded-lg" referrerPolicy="no-referrer" />
-                            </div>
-                            <span className="text-3xl font-black uppercase tracking-tighter text-slate-900">{match.team1}</span>
-                          </div>
-                          <span className="text-sm font-black text-slate-900/10 italic tracking-[0.5em]">VS</span>
-                          <div className="flex items-center space-x-8 w-[45%] justify-end">
-                            <span className="text-3xl font-black uppercase tracking-tighter text-slate-900">{match.team2}</span>
-                            <div className="w-16 h-10 bg-slate-900/5 rounded-xl overflow-hidden border border-slate-900/10 shadow-xl p-1">
-                              <img src={match.team2Flag} alt={match.team2} className="w-full h-full object-cover rounded-lg" referrerPolicy="no-referrer" />
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-32 gap-6 bg-white rounded-[3rem] border border-slate-900/10 shadow-2xl">
+                  <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading Inventory...</span>
+                </div>
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {filteredMatches.length > 0 ? (
+                    filteredMatches.map((match) => (
+                      <motion.div 
+                        key={match.id}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        className="group glass-card rounded-[2.5rem] shadow-2xl border border-slate-900/10 overflow-hidden hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all flex flex-col md:flex-row"
+                      >
+                        {/* Match Info */}
+                        <div className="p-10 flex-grow border-b md:border-b-0 md:border-r border-slate-900/5">
+                          <div className="flex items-center space-x-4 mb-8">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 bg-emerald-500/10 px-4 py-1.5 rounded-xl border border-emerald-500/20">{match.competition}</span>
+                            <div className="flex items-center space-x-3 text-[10px] font-black text-slate-900/50 uppercase tracking-[0.2em]">
+                              <Calendar className="w-4 h-4 text-blue-500" />
+                              <span>{match.date} • {match.time}</span>
                             </div>
                           </div>
+                          
+                          <div className="flex items-center justify-between mb-10">
+                            <div className="flex items-center space-x-8 w-[45%]">
+                              <div className="w-16 h-10 bg-slate-900/5 rounded-xl overflow-hidden border border-slate-900/10 shadow-xl p-1">
+                                <img src={match.t1Flag} alt={match.t1} className="w-full h-full object-cover rounded-lg" referrerPolicy="no-referrer" />
+                              </div>
+                              <span className="text-3xl font-black uppercase tracking-tighter text-slate-900">{match.t1}</span>
+                            </div>
+                            <span className="text-sm font-black text-slate-900/10 italic tracking-[0.5em]">VS</span>
+                            <div className="flex items-center space-x-8 w-[45%] justify-end">
+                              <span className="text-3xl font-black uppercase tracking-tighter text-slate-900">{match.t2}</span>
+                              <div className="w-16 h-10 bg-slate-900/5 rounded-xl overflow-hidden border border-slate-900/10 shadow-xl p-1">
+                                <img src={match.t2Flag} alt={match.t2} className="w-full h-full object-cover rounded-lg" referrerPolicy="no-referrer" />
+                              </div>
+                            </div>
+                          </div>
+  
+                          <div className="flex items-center text-[10px] text-slate-900/50 font-black uppercase tracking-[0.2em]">
+                            <MapPin className="w-4 h-4 mr-3 text-emerald-500" />
+                            {match.venue}
+                          </div>
                         </div>
-
-                        <div className="flex items-center text-[10px] text-slate-900/30 font-black uppercase tracking-[0.2em]">
-                          <MapPin className="w-4 h-4 mr-3 text-emerald-500" />
-                          {match.venue}
+  
+                        {/* Ticket Action */}
+                        <div className="p-10 bg-slate-900/5 flex flex-col justify-center items-center md:items-end min-w-[320px]">
+                          <div className="text-center md:text-right mb-10">
+                            <div className="text-[10px] text-slate-900/30 font-black uppercase tracking-[0.3em] mb-3">Tickets from</div>
+                            <div className="text-5xl font-black text-slate-900 font-mono-data tracking-tighter">${150 + (parseInt(match.id.replace(/\D/g, '') || '0') * 20)}</div>
+                            <div className="flex items-center justify-center md:justify-end gap-5 mt-6">
+                              <div className="flex items-center gap-2.5">
+                                <div className={`w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]`} />
+                                <span className="text-[9px] font-black text-slate-900/20 uppercase tracking-[0.2em]">Official</span>
+                              </div>
+                              <div className="flex items-center gap-2.5">
+                                <div className={`w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]`} />
+                                <span className="text-[9px] font-black text-slate-900/20 uppercase tracking-[0.2em]">Resale</span>
+                              </div>
+                            </div>
+                          </div>
+                          <Link 
+                            to={`/match/${match.id}`}
+                            className="w-full shining-button bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-10 py-6 rounded-2xl hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 text-[10px] flex items-center justify-center gap-4"
+                          >
+                            <Ticket className="w-4 h-4" />
+                            <span>View Tickets</span>
+                          </Link>
                         </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="glass-card rounded-[3rem] p-32 text-center border border-slate-900/10 shadow-2xl">
+                      <div className="w-28 h-28 bg-slate-900/5 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 border border-slate-900/10">
+                        <Search className="w-14 h-14 text-slate-900/10" />
                       </div>
-
-                      {/* Ticket Action */}
-                      <div className="p-10 bg-slate-900/5 flex flex-col justify-center items-center md:items-end min-w-[320px]">
-                        <div className="text-center md:text-right mb-10">
-                          <div className="text-[10px] text-slate-900/30 font-black uppercase tracking-[0.3em] mb-3">Tickets from</div>
-                          <div className="text-5xl font-black text-slate-900 font-mono-data tracking-tighter">${match.startingPrice}</div>
-                          <div className="flex items-center justify-center md:justify-end gap-5 mt-6">
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-2.5 h-2.5 rounded-full ${match.hasOfficial ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-slate-900/10'}`} />
-                              <span className="text-[9px] font-black text-slate-900/20 uppercase tracking-[0.2em]">Official</span>
-                            </div>
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-2.5 h-2.5 rounded-full ${match.hasResale ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-900/10'}`} />
-                              <span className="text-[9px] font-black text-slate-900/20 uppercase tracking-[0.2em]">Resale</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Link 
-                          to={`/match/${match.id}`}
-                          className="w-full shining-button bg-emerald-500 text-white font-black uppercase tracking-[0.3em] px-10 py-6 rounded-2xl hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 text-[10px] flex items-center justify-center gap-4"
-                        >
-                          <Ticket className="w-4 h-4" />
-                          <span>View Tickets</span>
-                        </Link>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="glass-card rounded-[3rem] p-32 text-center border border-slate-900/10 shadow-2xl">
-                    <div className="w-28 h-28 bg-slate-900/5 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 border border-slate-900/10">
-                      <Search className="w-14 h-14 text-slate-900/10" />
+                      <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-4">No matches found</h3>
+                      <p className="text-xs text-slate-900/20 font-bold uppercase tracking-[0.2em] mb-12 leading-relaxed">Try adjusting your filters or search query to find available fixtures.</p>
+                      <button onClick={clearFilters} className="text-emerald-400 font-black uppercase tracking-[0.3em] text-[10px] hover:text-emerald-300 transition-all border-b-2 border-emerald-400/20 pb-2">Clear all filters</button>
                     </div>
-                    <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-4">No matches found</h3>
-                    <p className="text-xs text-slate-900/20 font-bold uppercase tracking-[0.2em] mb-12 leading-relaxed">Try adjusting your filters or search query to find available fixtures.</p>
-                    <button onClick={clearFilters} className="text-emerald-400 font-black uppercase tracking-[0.3em] text-[10px] hover:text-emerald-300 transition-all border-b-2 border-emerald-400/20 pb-2">Clear all filters</button>
-                  </div>
-                )}
-              </AnimatePresence>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
           </div>
         </div>
